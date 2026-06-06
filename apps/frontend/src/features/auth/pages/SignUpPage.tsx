@@ -18,17 +18,22 @@ export default function SignUpPage() {
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors } } = useForm<F>({ resolver: zodResolver(schema) });
 
-  const onSubmit = async (data: F) => {
-    setLoading(true);
-    try {
-      await api.post('/auth/register', data);
-      success('Account created!', 'Check your email to verify your account.');
-      const loginRes = await api.post('/auth/login', { email: data.email, password: data.password });
-      setAuth(loginRes.data.data.user, loginRes.data.data.accessToken);
-      navigate('/dashboard');
-    } catch (e: any) { toastError(e?.response?.data?.error?.message || 'Registration failed'); }
-    finally { setLoading(false); }
-  };
+const onSubmit = async (data: F) => {
+  setLoading(true);
+  try {
+    await api.post('/auth/register', data);
+    const loginRes = await api.post('/auth/login', { 
+      email: data.email, 
+      password: data.password 
+    });
+    setAuth(loginRes.data.data.user, loginRes.data.data.accessToken);
+    success('Account created!');
+    navigate('/dashboard');
+  } catch (e: any) { 
+    toastError(e?.response?.data?.error?.message || 'Registration failed'); 
+  }
+  finally { setLoading(false); }
+};
 
   const Field = ({ name, label, type='text', placeholder }: { name: keyof F; label: string; type?: string; placeholder?: string }) => (
     <div>
