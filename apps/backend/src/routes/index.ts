@@ -1,0 +1,33 @@
+import { Express } from 'express';
+import authRoutes from '../features/auth/auth.routes';
+import userRoutes from '../features/users/users.routes';
+import habitRoutes from '../features/habits/habits.routes';
+import moodRoutes from '../features/mood/mood.routes';
+import sleepRoutes from '../features/sleep/sleep.routes';
+import hydrationRoutes from '../features/hydration/hydration.routes';
+import drinkTemplateRoutes from '../features/drink-templates/drink-templates.routes';
+import breathingRoutes from '../features/breathing/breathing.routes';
+import journalRoutes from '../features/journal/journal.routes';
+import goalRoutes from '../features/goals/goals.routes';
+import analyticsRoutes from '../features/analytics/analytics.routes';
+import calendarRoutes from '../features/calendar/calendar.routes';
+import notificationRoutes from '../features/notifications/notifications.routes';
+import exportRoutes from '../features/exports/exports.routes';
+
+const API = '/api/v1';
+export const registerRoutes = (app: Express) => {
+  app.use(`${API}/auth`, authRoutes);
+  app.use(`${API}/users`, userRoutes);
+  app.use(`${API}/habits`, habitRoutes);
+  app.use(`${API}/mood`, moodRoutes);
+  app.use(`${API}/sleep`, sleepRoutes);
+  app.use(`${API}/hydration`, hydrationRoutes);
+  app.use(`${API}/drink-templates`, drinkTemplateRoutes);
+  app.use(`${API}/breathing`, breathingRoutes);
+  app.use(`${API}/journal`, journalRoutes);
+  app.use(`${API}/goals`, goalRoutes);
+  app.use(`${API}/analytics`, analyticsRoutes);
+  app.use(`${API}/calendar`, calendarRoutes);
+  app.use(`${API}/notifications`, notificationRoutes);
+  app.use(`${API}/exports`, exportRoutes);
+};

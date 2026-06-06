@@ -1,0 +1,13 @@
+import { Router } from 'express';
+import { usersController } from './users.controller';
+import { authenticate } from '../../middleware/authenticate';
+const router = Router();
+router.use(authenticate);
+router.get('/me', usersController.getMe);
+router.patch('/me', usersController.updateMe);
+router.delete('/me', usersController.deleteAccount);
+router.get('/me/preferences', usersController.getPreferences);
+router.patch('/me/preferences', usersController.updatePreferences);
+router.patch('/me/dashboard', usersController.saveDashboard);
+router.get('/me/stats', usersController.getStats);
+export default router;

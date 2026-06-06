@@ -1,0 +1,15 @@
+import { Router } from 'express';
+import { habitsController } from './habits.controller';
+import { authenticate } from '../../middleware/authenticate';
+const r = Router();
+r.use(authenticate);
+r.get('/', habitsController.list); r.post('/', habitsController.create);
+r.patch('/reorder', habitsController.reorder);
+r.get('/logs/today', habitsController.getToday);
+r.get('/logs', habitsController.getLogs);
+r.get('/:id', habitsController.getOne); r.patch('/:id', habitsController.update);
+r.delete('/:id', habitsController.delete); r.patch('/:id/archive', habitsController.archive);
+r.post('/:id/log', habitsController.log);
+r.get('/:id/streak', habitsController.getStreak); r.get('/:id/stats', habitsController.getStats);
+r.get('/:id/calendar', habitsController.getCalendar);
+export default r;
