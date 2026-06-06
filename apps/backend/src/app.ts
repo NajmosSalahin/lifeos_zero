@@ -16,15 +16,28 @@ export const createApp = () => {
   app.set('trust proxy', 1);
 
   app.use(helmet({ contentSecurityPolicy: false }));
-  app.use(cors({ origin: config.CLIENT_URL, credentials: true, methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'] }));
-  app.options('*', cors({ origin: config.CLIENT_URL, credentials: true }));
+
+  app.use(cors({
+    origin: config.CLIENT_URL,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  }));
+
+  app.options('*', cors({
+    origin: config.CLIENT_URL,
+    credentials: true,
+  }));
+
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true }));
   app.use(cookieParser(config.COOKIE_SECRET));
   app.use(mongoSanitize());
   app.use(globalRateLimiter);
 
-  app.get('/health', (_req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
+  app.get('/health', (_req, res) => res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString()
+  }));
 
   registerRoutes(app);
 

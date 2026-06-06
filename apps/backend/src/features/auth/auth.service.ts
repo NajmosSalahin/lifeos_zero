@@ -1,4 +1,3 @@
-import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { addDays, addHours } from 'date-fns';
 import { User } from '../../models/User.model';
@@ -13,7 +12,7 @@ export class AuthService {
     return {
       httpOnly: true,
       secure: config.NODE_ENV === 'production',
-      sameSite: 'strict' as const,
+      sameSite: config.NODE_ENV === 'production' ? 'none' as const : 'strict' as const,
       maxAge: (rememberMe ? config.REMEMBER_ME_EXPIRES_DAYS : config.SESSION_EXPIRES_DAYS) * 86400000,
       path: '/'
     };
@@ -41,7 +40,9 @@ export class AuthService {
     user.loginCount += 1;
     await user.save();
     const accessToken = generateAccessToken(user._id.toString(), user.email, user.role);
-    const { rawToken, opts } = await this.createRefreshToken(user._id.toString(), dto.rememberMe ?? false, userAgent, ip);
+    const { rawToken, opts } = await this.createRefreshToken(
+      user._id.toString(), dto.rememberMe ?? false, userAgent, ip
+    );
     return { accessToken, rawToken, opts, user: this.sanitize(user) };
   }
 
@@ -59,7 +60,9 @@ export class AuthService {
     if (!user) throw new UnauthorizedError('User not found');
     doc.isActive = false;
     doc.revokedAt = new Date();
-    const { rawToken: newRaw, opts } = await this.createRefreshToken(user._id.toString(), false, userAgent, ip);
+    const { rawToken: newRaw, opts } = await this.createRefreshToken(
+      user._id.toString(), false, userAgent, ip
+    );
     doc.replacedByToken = hashToken(newRaw);
     await doc.save();
     const accessToken = generateAccessToken(user._id.toString(), user.email, user.role);
@@ -69,7 +72,10 @@ export class AuthService {
   private async createRefreshToken(userId: string, rememberMe: boolean, userAgent: string, ip: string) {
     const jti = uuidv4();
     const rawToken = generateRefreshToken(userId, jti, rememberMe);
-    const expiresAt = addDays(new Date(), rememberMe ? config.REMEMBER_ME_EXPIRES_DAYS : config.SESSION_EXPIRES_DAYS);
+    const expiresAt = addDays(
+      new Date(),
+      rememberMe ? config.REMEMBER_ME_EXPIRES_DAYS : config.SESSION_EXPIRES_DAYS
+    );
     await RefreshToken.create({ token: hashToken(rawToken), userId, userAgent, ipAddress: ip, expiresAt });
     return { rawToken, opts: this.cookieOpts(rememberMe) };
   }
