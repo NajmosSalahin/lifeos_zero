@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Droplets, Plus, Trash2, Settings, FlaskConical, Calculator, X, Check, Edit2, RefreshCw } from 'lucide-react';
+import { Droplets, Plus, Trash2, Settings, FlaskConical, X, Check, Edit2, RefreshCw } from 'lucide-react';
 import { api } from '../../../shared/lib/axios';
 import { qk } from '../../../shared/lib/queryKeys';
 import { ProgressRing } from '../../../shared/components/data-display/ProgressRing';
@@ -349,7 +349,8 @@ export default function HydrationPage() {
   const qc = useQueryClient();
   const { success, error } = useToast();
 
-  const [tab, setTab] = useState<'today' | 'templates' | 'settings'>('today');
+  const [tab, setTab] = useState<'today' | 'templates'>('today');
+  const [showSettings, setShowSettings] = useState(false);
   const [showCustomMl, setShowCustomMl] = useState(false);
   const [customMl, setCustomMl] = useState('');
   const [customDrinkType, setCustomDrinkType] = useState('water');
@@ -409,14 +410,19 @@ export default function HydrationPage() {
 
       {/* Tabs */}
       <div className="flex gap-2 border-b pb-0" style={{ borderColor: 'var(--color-border)' }}>
-        {(['today', 'templates', 'settings'] as const).map(t => (
+        {(['today', 'templates'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
             className={cn('pb-3 px-1 text-sm font-medium capitalize border-b-2 -mb-px transition-colors',
               tab === t ? 'border-[var(--color-accent)]' : 'border-transparent hover:border-[var(--color-border)]')}
             style={tab === t ? { color: 'var(--color-accent)' } : { color: 'var(--color-text-muted)' }}>
-            {t === 'today' ? '💧 Today' : t === 'templates' ? '🫙 Drinks' : '⚙️ Settings'}
+            {t === 'today' ? '💧 Today' : '🫙 Drinks'}
           </button>
         ))}
+        <button onClick={() => setShowSettings(!showSettings)}
+          className={cn('pb-3 px-1 text-sm font-medium border-b-2 -mb-px transition-colors', showSettings ? 'border-[var(--color-accent)]' : 'border-transparent hover:border-[var(--color-border)]')}
+          style={{ color: showSettings ? 'var(--color-accent)' : 'var(--color-text-muted)' }}>
+          ⚙️ Settings
+        </button>
       </div>
 
       {/* ── TODAY TAB ─────────────────────────────────────────── */}
@@ -625,8 +631,8 @@ export default function HydrationPage() {
         </div>
       )}
 
-      {/* ── SETTINGS TAB ──────────────────────────────────────── */}
-      {tab === 'settings' && (
+      {/* ── SETTINGS ──────────────────────────────────────────── */}
+      {showSettings && (
         <AutoHydrationSettings
           todayGoal={today?.goal}
           updateProfileMut={updateProfileMut}

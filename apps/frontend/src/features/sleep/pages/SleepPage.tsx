@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Moon, Plus, Trash2, Star, Clock, Sunrise } from 'lucide-react';
+import { Moon, Plus, Trash2, Star, Clock, Sunrise, Settings } from 'lucide-react';
 import { api } from '../../../shared/lib/axios';
 import { qk } from '../../../shared/lib/queryKeys';
 import { EmptyState } from '../../../shared/components/feedback/EmptyState';
@@ -13,12 +13,16 @@ import { useSleepStore, type SleepMode } from '../stores/sleep.store';
 const CYCLE_MINUTES = 90;
 const FALL_ASLEEP_MINUTES = 15;
 
-const CYCLE_PROMPTS: Record<number, { label: string; color: string; emoji: string }> = {
-  3: { label: 'Too short — not sustainable long-term', color: '#ef4444', emoji: '⚠️' },
-  4: { label: 'Minimum — risk of sleep debt over time', color: '#f59e0b', emoji: '⚠️' },
-  5: { label: 'Optimal for most adults', color: '#22c55e', emoji: '⭐' },
-  6: { label: 'Generous — great for recovery or active lifestyles', color: '#22c55e', emoji: '⭐' },
-  7: { label: 'Long — ensure quality isnt compensating for deficiency', color: '#3b82f6', emoji: 'ℹ️' },
+const CYCLE_PROMPTS: Record<string, { label: string; color: string; emoji: string }> = {
+  '0.5': { label: 'Power nap — boosts alertness without grogginess', color: '#3b82f6', emoji: '💤' },
+  '1':   { label: 'Short nap — includes one full light-to-REM cycle', color: '#22c55e', emoji: '💤' },
+  '1.5': { label: 'Light nap — 1.5 cycles', color: '#22c55e', emoji: '💤' },
+  '2':   { label: 'Extended nap — two cycles, useful for recovery', color: '#f59e0b', emoji: '💤' },
+  '3':   { label: 'Too short — not sustainable long-term', color: '#ef4444', emoji: '⚠️' },
+  '4':   { label: 'Minimum — risk of sleep debt over time', color: '#f59e0b', emoji: '⚠️' },
+  '5':   { label: 'Optimal for most adults', color: '#22c55e', emoji: '⭐' },
+  '6':   { label: 'Generous — great for recovery or active lifestyles', color: '#22c55e', emoji: '⭐' },
+  '7':   { label: 'Long — ensure quality isnt compensating for deficiency', color: '#3b82f6', emoji: 'ℹ️' },
 };
 
 function timeToMinutes(t: string): number {
@@ -41,7 +45,8 @@ function calculateDurationMinutes(bedtime: string, wakeUp: string): number {
 
 function getCycleInfo(cycles: number) {
   const duration = cycles * CYCLE_MINUTES;
-  const prompt = CYCLE_PROMPTS[cycles] ?? { label: `${duration} min`, color: 'var(--color-text-muted)', emoji: '' };
+  const key = cycles % 1 === 0 ? String(cycles) : String(cycles);
+  const prompt = CYCLE_PROMPTS[key] ?? { label: `${duration} min`, color: 'var(--color-text-muted)', emoji: '' };
   return { duration, hours: duration / 60, prompt };
 }
 
@@ -55,8 +60,8 @@ function calculateFromWakeupCycles(wakeUp: string, cycles: number) {
 
 function calculateFromBedtimeWakeup(bedtime: string, wakeUp: string) {
   const rawDuration = calculateDurationMinutes(bedtime, wakeUp);
-  const rawCycles = Math.round((rawDuration - FALL_ASLEEP_MINUTES) / CYCLE_MINUTES);
-  const snappedCycles = Math.max(3, Math.min(7, rawCycles));
+  const rawCycles = Math.round((rawDuration - FALL_ASLEEP_MINUTES) / CYCLE_MINUTES * 2) / 2;
+  const snappedCycles = Math.max(0.5, Math.min(7, rawCycles));
   const snappedDuration = snappedCycles * CYCLE_MINUTES;
   const totalInBed = snappedDuration + FALL_ASLEEP_MINUTES;
   const snappedWakeMins = (timeToMinutes(bedtime) + totalInBed) % 1440;
@@ -84,6 +89,7 @@ function calculateFromBedtimeCycles(bedtime: string, cycles: number) {
 
 export default function SleepPage() {
   const [showLog, setShowLog] = useState(false);
+  const [showCalculator, setShowCalculator] = useState(false);
   const [form, setForm] = useState({ bedtime: '', wakeTime: '', quality: 4, note: '' });
   const qc = useQueryClient();
   const { success, error } = useToast();
@@ -158,9 +164,16 @@ export default function SleepPage() {
           <h1 className="text-2xl font-bold" style={{ color:'var(--color-text-primary)' }}>Sleep</h1>
           <p className="text-sm mt-0.5" style={{ color:'var(--color-text-muted)' }}>Track your sleep patterns</p>
         </div>
-        <button onClick={()=>setShowLog(!showLog)} className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white" style={{ backgroundColor:'var(--color-accent)' }}>
-          <Plus className="h-4 w-4" /> Log Sleep
-        </button>
+        <div className="flex gap-2">
+          <button onClick={()=>setShowCalculator(!showCalculator)}
+            className={cn('flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors border', showCalculator ? 'border-[var(--color-accent)]' : 'border-[var(--color-border)]')}
+            style={{ backgroundColor:'var(--color-surface-2)', color: showCalculator ? 'var(--color-accent)' : 'var(--color-text-secondary)' }}>
+            <Settings className="h-4 w-4" /> Cycles
+          </button>
+          <button onClick={()=>setShowLog(!showLog)} className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white" style={{ backgroundColor:'var(--color-accent)' }}>
+            <Plus className="h-4 w-4" /> Log Sleep
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-3 gap-4">
@@ -170,6 +183,7 @@ export default function SleepPage() {
       </div>
 
       {/* ── Sleep Cycle Calculator ─────────────────────────────── */}
+      {showCalculator && (
       <div className="rounded-xl border p-5" style={{ backgroundColor:'var(--color-surface)', borderColor:'var(--color-border)' }}>
         <h2 className="font-semibold mb-1" style={{ color:'var(--color-text-primary)' }}>Sleep Cycle Calculator</h2>
         <p className="text-xs mb-4" style={{ color:'var(--color-text-muted)' }}>
@@ -216,13 +230,13 @@ export default function SleepPage() {
                 <Clock className="h-3 w-3 inline mr-1" />Sleep Cycles
               </label>
               <div className="flex gap-2 items-center">
-                <input type="range" min={3} max={7} step={1} value={cyclesInput}
+                <input type="range" min={0.5} max={7} step={0.5} value={cyclesInput}
                   onChange={e => setCyclesInput(Number(e.target.value))}
                   className="flex-1 accent-[var(--color-accent)]" />
-                <span className="text-sm font-medium w-8 text-right" style={{ color:'var(--color-text-primary)' }}>{cyclesInput}</span>
+                <span className="text-sm font-medium w-10 text-right" style={{ color:'var(--color-text-primary)' }}>{cyclesInput}</span>
               </div>
               <div className="flex justify-between text-xs mt-0.5" style={{ color:'var(--color-text-muted)' }}>
-                <span>3 (4.5h)</span><span>5 (7.5h)</span><span>7 (10.5h)</span>
+                <span>0.5 (45m)</span><span>1 (1.5h)</span><span>2 (3h)</span><span>5 (7.5h)</span><span>7 (10.5h)</span>
               </div>
             </div>
           )}
@@ -278,6 +292,7 @@ export default function SleepPage() {
           </div>
         )}
       </div>
+      )}
 
       {/* ── Log Form ───────────────────────────────────────────── */}
       {showLog && (
