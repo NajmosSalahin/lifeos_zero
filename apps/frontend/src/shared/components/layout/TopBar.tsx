@@ -20,10 +20,10 @@ export const TopBar = () => {
       <div />
       <div className="flex items-center gap-2">
         <button className="relative flex h-9 w-9 items-center justify-center rounded-lg transition-colors hover:bg-[var(--color-surface-2)]"
-          onClick={() => navigate('/settings')} style={{ color:'var(--color-text-secondary)' }}>
+          onClick={() => navigate('/app/settings')} style={{ color:'var(--color-text-secondary)' }}>
           <Bell className="h-4 w-4" />
         </button>
-        <button onClick={() => navigate('/settings')}
+        <button onClick={() => navigate('/app/settings')}
           className="flex h-9 w-9 items-center justify-center rounded-lg text-sm font-semibold transition-colors hover:bg-[var(--color-surface-2)]"
           style={{ backgroundColor:'var(--color-surface-2)', color:'var(--color-text-primary)' }}
           title={user ? `${user.firstName} ${user.lastName}` : 'profile'}>

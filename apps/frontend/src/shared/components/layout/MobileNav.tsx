@@ -3,11 +3,11 @@ import { LayoutDashboard, CheckSquare, Smile, BookOpen, Target } from 'lucide-re
 import { cn } from '../../lib/utils';
 
 const NAV = [
-  { to:'/dashboard', icon: LayoutDashboard, label:'home' },
-  { to:'/habits',    icon: CheckSquare,     label:'habits' },
-  { to:'/mood',      icon: Smile,           label:'mood' },
-  { to:'/journal',   icon: BookOpen,        label:'journal' },
-  { to:'/goals',     icon: Target,          label:'goals' },
+  { to:'/app/dashboard', icon: LayoutDashboard, label:'home' },
+  { to:'/app/habits',    icon: CheckSquare,     label:'habits' },
+  { to:'/app/mood',      icon: Smile,           label:'mood' },
+  { to:'/app/journal',   icon: BookOpen,        label:'journal' },
+  { to:'/app/goals',     icon: Target,          label:'goals' },
 ];
 
 export const MobileNav = () => (

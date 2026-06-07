@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from '../shared/stores/auth.store';
 import { AppShell } from '../shared/components/layout/AppShell';
+import LandingPage from '../features/landing/pages/LandingPage';
 
 const LoginPage          = lazy(() => import('../features/auth/pages/LoginPage'));
 const SignUpPage          = lazy(() => import('../features/auth/pages/SignUpPage'));
@@ -38,20 +39,21 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const GuestRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, isInitialized } = useAuthStore();
   if (!isInitialized) return <Loader />;
-  if (isAuthenticated) return <Navigate to="/dashboard" replace />;
+  if (isAuthenticated) return <Navigate to="/app/dashboard" replace />;
   return <>{children}</>;
 };
 
 export const AppRouter = () => (
   <Suspense fallback={<Loader />}>
     <Routes>
+      <Route path="/" element={<LandingPage />} />
       <Route path="/login"           element={<GuestRoute><LoginPage /></GuestRoute>} />
       <Route path="/signup"          element={<GuestRoute><SignUpPage /></GuestRoute>} />
       <Route path="/forgot-password" element={<GuestRoute><ForgotPasswordPage /></GuestRoute>} />
       <Route path="/reset-password"  element={<GuestRoute><ResetPasswordPage /></GuestRoute>} />
       <Route path="/verify-email"    element={<VerifyEmailPage />} />
-      <Route path="/" element={<ProtectedRoute><AppShell /></ProtectedRoute>}>
-        <Route index element={<Navigate to="/dashboard" replace />} />
+      <Route path="/app" element={<ProtectedRoute><AppShell /></ProtectedRoute>}>
+        <Route index element={<Navigate to="/app/dashboard" replace />} />
         <Route path="dashboard"  element={<DashboardPage />} />
         <Route path="habits"     element={<HabitsPage />} />
         <Route path="mood"       element={<MoodPage />} />
@@ -66,7 +68,7 @@ export const AppRouter = () => (
         <Route path="calendar"   element={<CalendarPage />} />
         <Route path="settings"   element={<SettingsPage />} />
       </Route>
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      <Route path="*" element={<Navigate to="/app/dashboard" replace />} />
     </Routes>
   </Suspense>
 );

@@ -4,16 +4,16 @@ import { usePreferencesStore } from '../../stores/preferences.store';
 import { cn } from '../../lib/utils';
 
 const NAV = [
-  { to:'/dashboard',  icon: LayoutDashboard, label:'dashboard' },
-  { to:'/habits',     icon: CheckSquare,     label:'habits' },
-  { to:'/mood',       icon: Smile,           label:'mood' },
-  { to:'/sleep',      icon: Moon,            label:'sleep' },
-  { to:'/hydration',  icon: Droplets,        label:'hydration' },
-  { to:'/breathing',  icon: Wind,            label:'breathing' },
-  { to:'/journal',    icon: BookOpen,        label:'journal' },
-  { to:'/goals',      icon: Target,          label:'goals' },
-  { to:'/analytics',  icon: BarChart3,       label:'analytics' },
-  { to:'/calendar',   icon: Calendar,        label:'calendar' },
+  { to:'/app/dashboard',  icon: LayoutDashboard, label:'dashboard' },
+  { to:'/app/habits',     icon: CheckSquare,     label:'habits' },
+  { to:'/app/mood',       icon: Smile,           label:'mood' },
+  { to:'/app/sleep',      icon: Moon,            label:'sleep' },
+  { to:'/app/hydration',  icon: Droplets,        label:'hydration' },
+  { to:'/app/breathing',  icon: Wind,            label:'breathing' },
+  { to:'/app/journal',    icon: BookOpen,        label:'journal' },
+  { to:'/app/goals',      icon: Target,          label:'goals' },
+  { to:'/app/analytics',  icon: BarChart3,       label:'analytics' },
+  { to:'/app/calendar',   icon: Calendar,        label:'calendar' },
 ];
 
 export const Sidebar = () => {
@@ -49,7 +49,7 @@ export const Sidebar = () => {
 
       {/* Settings + collapse */}
       <div className="border-t p-2 space-y-0.5" style={{ borderColor:'var(--color-border)' }}>
-        <NavLink to="/settings" className={({ isActive }) => cn(
+        <NavLink to="/app/settings" className={({ isActive }) => cn(
           'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
           isActive ? 'text-white' : 'hover:bg-[var(--color-surface-2)]'
         )} style={({ isActive }) => isActive ? { backgroundColor:'var(--color-accent)' } : { color:'var(--color-text-secondary)' }}>
