@@ -7,7 +7,12 @@ const processQueue = (err: any, token: string|null = null) => { failedQueue.forE
 const getStoredToken = () => { try { const s = JSON.parse(sessionStorage.getItem('lifeos-auth')||'{}'); return s?.state?.accessToken||null; } catch { return null; } };
 const setStoredToken = (t: string) => { try { const s = JSON.parse(sessionStorage.getItem('lifeos-auth')||'{}'); if(s?.state){s.state.accessToken=t;sessionStorage.setItem('lifeos-auth',JSON.stringify(s));} } catch {} };
 
-export const api = axios.create({ baseURL: '/api/v1', withCredentials: true, headers: {'Content-Type':'application/json'}, timeout: 15000 });
+export const api = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1',
+  withCredentials: true,
+  headers: { 'Content-Type': 'application/json' },
+  timeout: 15000,
+});
 
 api.interceptors.request.use((c: InternalAxiosRequestConfig) => { const t = getStoredToken(); if(t) c.headers.Authorization=`Bearer ${t}`; return c; });
 
