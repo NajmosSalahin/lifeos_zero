@@ -1,20 +1,17 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { User, Palette, Shield, Bell, LogOut, Trash2, Save, Check } from 'lucide-react';
+import { User, Palette, Shield, Trash2, Save, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../../shared/lib/axios';
 import { useAuthStore } from '../../../shared/stores/auth.store';
-import { usePreferencesStore } from '../../../shared/stores/preferences.store';
 import { useTheme } from '../../../shared/hooks/useTheme';
 import { useToast } from '../../../shared/hooks/useToast';
 import { THEMES } from '../../../constants/themes';
 import { FONTS } from '../../../constants/fonts';
 import { cn } from '../../../shared/lib/utils';
 
-const ACCENT_COLORS = ['#6366f1','#8b5cf6','#ec4899','#ef4444','#f97316','#f59e0b','#22c55e','#10b981','#06b6d4','#3b82f6'];
-
 export default function SettingsPage() {
-  const [tab, setTab] = useState<'profile'|'appearance'|'security'|'notifications'>('profile');
+  const [tab, setTab] = useState<'profile'|'appearance'|'security'>('profile');
   const user = useAuthStore(s => s.user);
   const { updateUser, clearAuth } = useAuthStore();
   const { success, error } = useToast();
@@ -22,13 +19,13 @@ export default function SettingsPage() {
   const qc = useQueryClient();
 
   // Profile form
-  const [profileForm, setProfileForm] = useState({ firstName: user?.firstName || '', lastName: user?.lastName || '', email: user?.email || '', timezone: user?.timezone || 'UTC', hydrationGoal: user?.hydrationGoal || 2500, sleepGoal: user?.sleepGoal || 480 });
+  const [profileForm, setProfileForm] = useState({ firstName: user?.firstName || '', lastName: user?.lastName || '', email: user?.email || '', timezone: user?.timezone || 'UTC' });
 
   // Security form
   const [secForm, setSecForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
 
   // Theme
-  const { theme, font, density, accentColor, reducedMotion, setTheme, setFont, setDensity, setAccentColor, updatePreference } = useTheme();
+  const { theme, font, density, reducedMotion, setTheme, setFont, setDensity, updatePreference } = useTheme();
 
   const updateProfileMut = useMutation({
     mutationFn: (dto: any) => api.patch('/users/me', dto),
@@ -112,23 +109,7 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          <div className="rounded-xl border p-5" style={{ backgroundColor:'var(--color-surface)', borderColor:'var(--color-border)' }}>
-            <h2 className="font-semibold mb-4" style={{ color:'var(--color-text-primary)' }}>Daily Goals</h2>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs mb-1.5" style={{ color:'var(--color-text-muted)' }}>Hydration goal (ml/day)</label>
-                <input type="number" value={profileForm.hydrationGoal} onChange={e => setProfileForm(f => ({...f,hydrationGoal:Number(e.target.value)}))} min={500} max={10000}
-                  className="w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-[var(--color-accent)]"
-                  style={{ backgroundColor:'var(--color-surface-2)', borderColor:'var(--color-border)', color:'var(--color-text-primary)' }} />
-              </div>
-              <div>
-                <label className="block text-xs mb-1.5" style={{ color:'var(--color-text-muted)' }}>Sleep goal (minutes/night)</label>
-                <input type="number" value={profileForm.sleepGoal} onChange={e => setProfileForm(f => ({...f,sleepGoal:Number(e.target.value)}))} min={120} max={720}
-                  className="w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-[var(--color-accent)]"
-                  style={{ backgroundColor:'var(--color-surface-2)', borderColor:'var(--color-border)', color:'var(--color-text-primary)' }} />
-              </div>
-            </div>
-          </div>
+
 
           <button onClick={() => updateProfileMut.mutate(profileForm)} disabled={updateProfileMut.isPending}
             className="flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium text-white disabled:opacity-50"
@@ -196,20 +177,6 @@ export default function SettingsPage() {
                   {d}
                 </button>
               ))}
-            </div>
-          </div>
-
-          {/* Accent color */}
-          <div className="rounded-xl border p-5" style={{ backgroundColor:'var(--color-surface)', borderColor:'var(--color-border)' }}>
-            <h2 className="font-semibold mb-4" style={{ color:'var(--color-text-primary)' }}>Accent Color</h2>
-            <div className="flex gap-3 flex-wrap">
-              {ACCENT_COLORS.map(c => (
-                <button key={c} onClick={() => setAccentColor(c)}
-                  className="h-8 w-8 rounded-full transition-transform hover:scale-110 border-2"
-                  style={{ backgroundColor:c, borderColor: accentColor===c ? 'var(--color-text-primary)' : 'transparent' }} />
-              ))}
-              <input type="color" value={accentColor} onChange={e => setAccentColor(e.target.value)}
-                className="h-8 w-8 rounded-full cursor-pointer border-0 p-0 bg-transparent" title="Custom color" />
             </div>
           </div>
 

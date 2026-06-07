@@ -6,6 +6,7 @@ import { queryClient } from './queryClient';
 import { usePreferencesStore } from '../shared/stores/preferences.store';
 import { useAuthStore } from '../shared/stores/auth.store';
 import { api } from '../shared/lib/axios';
+import { THEMES } from '../constants/themes';
 
 const AppInit: FC = () => {
   const prefs = usePreferencesStore(s => s.preferences);
@@ -17,7 +18,6 @@ const AppInit: FC = () => {
     document.documentElement.setAttribute('data-theme', prefs.theme);
     document.documentElement.setAttribute('data-font', prefs.font);
     document.documentElement.setAttribute('data-density', prefs.density);
-    document.documentElement.style.setProperty('--color-accent', prefs.accentColor);
     document.documentElement.setAttribute('data-motion', prefs.reducedMotion ? 'reduce' : 'normal');
   }, [prefs]);
 

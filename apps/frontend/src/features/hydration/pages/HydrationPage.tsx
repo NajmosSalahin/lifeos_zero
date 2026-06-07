@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Droplets, Plus, Trash2, Settings, FlaskConical, Calculator, X, Check, Edit2 } from 'lucide-react';
+import { Droplets, Plus, Trash2, Settings, FlaskConical, Calculator, X, Check, Edit2, RefreshCw } from 'lucide-react';
 import { api } from '../../../shared/lib/axios';
 import { qk } from '../../../shared/lib/queryKeys';
 import { ProgressRing } from '../../../shared/components/data-display/ProgressRing';
@@ -154,16 +154,26 @@ function DrinkTemplateForm({ template, onClose }: { template?: any; onClose: () 
   );
 }
 
-// ── Smart Goal Calculator ─────────────────────────────────────────
-function GoalCalculator({ onClose, onApply }: { onClose: () => void; onApply: (goal: number) => void }) {
+function calculateHydrationGoal(weight: number, height: number, activityLevel: string, temp: number, humidity: number): number {
+  const activityFactor = ACTIVITY_LEVELS.find(a => a.id === activityLevel)?.factor ?? 1.55;
+  const baseBody = (weight * 35) + ((height - 150) * 5);
+  const tempFactor = 1 + (temp - 22) * 0.015;
+  const humidityFactor = 1 + (humidity - 50) * 0.005;
+  return Math.max(Math.round(baseBody * activityFactor * tempFactor * humidityFactor), 1000);
+}
+
+// ── Auto Hydration Goal Settings ──────────────────────────────────
+function AutoHydrationSettings({ todayGoal, updateProfileMut, qcClient }: { todayGoal?: number; updateProfileMut: any; qcClient: any }) {
   const user = useAuthStore(s => s.user);
+  const { updateUser } = useAuthStore();
+  const { error, success } = useToast();
+
   const [weight, setWeight] = useState(user?.weight ?? 70);
   const [height, setHeight] = useState(user?.height ?? 170);
-  const [activity, setActivity] = useState((user as any)?.activityLevel ?? 'moderate');
+  const [activity, setActivity] = useState(user?.activityLevel ?? 'moderate');
   const [weather, setWeather] = useState<{ temp: number; humidity: number } | null>(null);
   const [loadingWeather, setLoadingWeather] = useState(false);
-  const [calculated, setCalculated] = useState<number | null>(null);
-  const { error } = useToast();
+  const saveTimer = useRef<ReturnType<typeof setTimeout>>();
 
   const fetchWeather = async () => {
     setLoadingWeather(true);
@@ -177,7 +187,7 @@ function GoalCalculator({ onClose, onApply }: { onClose: () => void; onApply: (g
       );
       const data = await res.json();
       setWeather({
-        temp:     data.current.temperature_2m,
+        temp: data.current.temperature_2m,
         humidity: data.current.relative_humidity_2m,
       });
     } catch {
@@ -188,104 +198,146 @@ function GoalCalculator({ onClose, onApply }: { onClose: () => void; onApply: (g
     }
   };
 
-  const calculate = () => {
-    const activityFactor = ACTIVITY_LEVELS.find(a => a.id === activity)?.factor ?? 1.55;
-    const temp     = weather?.temp     ?? 22;
-    const humidity = weather?.humidity ?? 50;
-    const baseBody       = (weight * 35) + ((height - 150) * 5);
-    const tempFactor     = 1 + (temp - 22) * 0.015;
-    const humidityFactor = 1 + (humidity - 50) * 0.005;
-    const goal = Math.max(Math.round(baseBody * activityFactor * tempFactor * humidityFactor), 1000);
-    setCalculated(goal);
-  };
+  const goal = calculateHydrationGoal(
+    weight, height, activity,
+    weather?.temp ?? 22,
+    weather?.humidity ?? 50
+  );
+
+  const saveChanges = useCallback(() => {
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      updateProfileMut.mutate(
+        { weight, height, activityLevel: activity, hydrationGoal: goal },
+        {
+          onSuccess: (res: any) => {
+            updateUser(res.data.data.user);
+            qcClient.invalidateQueries({ queryKey: ['hydration'] });
+          },
+        }
+      );
+    }, 500);
+  }, [weight, height, activity, goal, updateProfileMut, updateUser, qcClient]);
+
+  useEffect(() => {
+    saveChanges();
+    return () => { if (saveTimer.current) clearTimeout(saveTimer.current); };
+  }, [weight, height, activity]);
+
+  useEffect(() => {
+    if (weather) {
+      updateProfileMut.mutate(
+        { weight, height, activityLevel: activity, hydrationGoal: goal },
+        {
+          onSuccess: (res: any) => {
+            updateUser(res.data.data.user);
+            qcClient.invalidateQueries({ queryKey: ['hydration'] });
+          },
+        }
+      );
+    }
+  }, [weather?.temp, weather?.humidity]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
-      onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="w-full max-w-md rounded-2xl border p-6"
-        style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-            Smart Goal Calculator
-          </h2>
-          <button onClick={onClose} style={{ color: 'var(--color-text-muted)' }}><X className="h-4 w-4" /></button>
+    <div className="space-y-5">
+      {/* Auto-calculated goal */}
+      <div className="rounded-xl border p-5 text-center" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+        <h2 className="font-semibold mb-1" style={{ color: 'var(--color-text-primary)' }}>Hydration Goal</h2>
+        <p className="text-4xl font-bold tabular-nums mt-2" style={{ color: 'var(--color-accent)' }}>
+          {goal.toLocaleString()}<span className="text-lg ml-1" style={{ color: 'var(--color-text-secondary)' }}>ml</span>
+        </p>
+        <p className="text-xs mt-1.5" style={{ color: 'var(--color-text-muted)' }}>
+          Automatically calculated from your body stats, activity, and weather
+        </p>
+        <div className="mt-3 flex items-center justify-center gap-4 text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+          <span>{weight}kg</span>
+          <span>{height}cm</span>
+          <span>{ACTIVITY_LEVELS.find(a => a.id === activity)?.label}</span>
+          <span>{weather ? `${weather.temp}°C` : '22°C'}</span>
+          <span>{weather ? `${weather.humidity}%` : '50%'} humidity</span>
         </div>
+      </div>
 
-        <div className="space-y-4">
-          {/* Weight + Height */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs mb-1" style={{ color: 'var(--color-text-muted)' }}>Weight (kg)</label>
-              <input type="number" value={weight} onChange={e => setWeight(Number(e.target.value))} min={30} max={300}
-                className="w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-[var(--color-accent)]"
-                style={{ backgroundColor: 'var(--color-surface-2)', borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }} />
-            </div>
-            <div>
-              <label className="block text-xs mb-1" style={{ color: 'var(--color-text-muted)' }}>Height (cm)</label>
-              <input type="number" value={height} onChange={e => setHeight(Number(e.target.value))} min={100} max={250}
-                className="w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-[var(--color-accent)]"
-                style={{ backgroundColor: 'var(--color-surface-2)', borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }} />
-            </div>
-          </div>
-
-          {/* Activity Level */}
+      {/* Body Stats */}
+      <div className="rounded-xl border p-5" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+        <h2 className="font-semibold mb-4" style={{ color: 'var(--color-text-primary)' }}>Body Stats</h2>
+        <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs mb-2" style={{ color: 'var(--color-text-muted)' }}>Activity Level</label>
-            <div className="space-y-1.5">
-              {ACTIVITY_LEVELS.map(a => (
-                <button key={a.id} onClick={() => setActivity(a.id)}
-                  className={cn('w-full flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors border',
-                    activity === a.id ? 'border-[var(--color-accent)]' : 'border-[var(--color-border)] hover:bg-[var(--color-surface-2)]')}
-                  style={{ backgroundColor: activity === a.id ? 'var(--color-accent)10' : 'var(--color-surface-2)', color: 'var(--color-text-primary)' }}>
-                  <span className="font-medium">{a.label}</span>
-                  <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>{a.desc}</span>
-                  {activity === a.id && <Check className="h-4 w-4 shrink-0" style={{ color: 'var(--color-accent)' }} />}
-                </button>
-              ))}
-            </div>
+            <label className="block text-xs mb-1" style={{ color: 'var(--color-text-muted)' }}>Weight (kg)</label>
+            <input type="number" value={weight} onChange={e => { setWeight(Number(e.target.value)); }} min={30} max={300}
+              className="w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-[var(--color-accent)]"
+              style={{ backgroundColor: 'var(--color-surface-2)', borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }} />
           </div>
-
-          {/* Weather */}
-          <div className="rounded-lg border p-3" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-surface-2)' }}>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
-                  {weather ? `🌡️ ${weather.temp}°C  💧 ${weather.humidity}% humidity` : 'Add weather data for accuracy'}
-                </p>
-                <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
-                  {weather ? 'Using your current local conditions' : 'Uses 22°C, 50% if skipped'}
-                </p>
-              </div>
-              <button onClick={fetchWeather} disabled={loadingWeather}
-                className="rounded-lg px-3 py-1.5 text-xs font-medium text-white disabled:opacity-50"
-                style={{ backgroundColor: 'var(--color-accent)' }}>
-                {loadingWeather ? '…' : weather ? 'Refresh' : 'Get Weather'}
-              </button>
-            </div>
+          <div>
+            <label className="block text-xs mb-1" style={{ color: 'var(--color-text-muted)' }}>Height (cm)</label>
+            <input type="number" value={height} onChange={e => { setHeight(Number(e.target.value)); }} min={100} max={250}
+              className="w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-[var(--color-accent)]"
+              style={{ backgroundColor: 'var(--color-surface-2)', borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }} />
           </div>
-
-          {/* Result */}
-          {calculated && (
-            <div className="rounded-xl border-2 p-4 text-center" style={{ borderColor: 'var(--color-accent)', backgroundColor: 'var(--color-accent)10' }}>
-              <p className="text-3xl font-bold" style={{ color: 'var(--color-accent)' }}>{calculated.toLocaleString()}ml</p>
-              <p className="text-sm mt-1" style={{ color: 'var(--color-text-secondary)' }}>Recommended daily intake</p>
-            </div>
-          )}
         </div>
+      </div>
 
-        <div className="flex gap-2 mt-5">
-          <button onClick={calculate}
-            className="flex-1 rounded-lg py-2.5 text-sm font-medium text-white"
-            style={{ backgroundColor: 'var(--color-accent)' }}>
-            <Calculator className="h-4 w-4 inline mr-1.5" />Calculate
-          </button>
-          {calculated && (
-            <button onClick={() => { onApply(calculated); onClose(); }}
-              className="flex-1 rounded-lg py-2.5 text-sm font-medium border-2 font-semibold"
-              style={{ borderColor: 'var(--color-accent)', color: 'var(--color-accent)' }}>
-              Apply Goal
+      {/* Activity Level */}
+      <div className="rounded-xl border p-5" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+        <h2 className="font-semibold mb-3" style={{ color: 'var(--color-text-primary)' }}>Activity Level</h2>
+        <div className="space-y-1.5">
+          {ACTIVITY_LEVELS.map(a => (
+            <button key={a.id} onClick={() => setActivity(a.id)}
+              className={cn('w-full flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors border',
+                activity === a.id ? 'border-[var(--color-accent)]' : 'border-[var(--color-border)] hover:bg-[var(--color-surface-2)]')}
+              style={{ backgroundColor: activity === a.id ? 'var(--color-accent)10' : 'var(--color-surface-2)', color: 'var(--color-text-primary)' }}>
+              <span className="font-medium">{a.label}</span>
+              <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>{a.desc}</span>
+              {activity === a.id && <Check className="h-4 w-4 shrink-0" style={{ color: 'var(--color-accent)' }} />}
             </button>
-          )}
+          ))}
+        </div>
+      </div>
+
+      {/* Weather */}
+      <div className="rounded-lg border p-3" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-surface-2)' }}>
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
+              {weather ? `🌡️ ${weather.temp}°C  💧 ${weather.humidity}% humidity` : 'No weather data — using defaults (22°C, 50%)'}
+            </p>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
+              Affects your hydration goal calculation
+            </p>
+          </div>
+          <button onClick={fetchWeather} disabled={loadingWeather}
+            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-white disabled:opacity-50"
+            style={{ backgroundColor: 'var(--color-accent)' }}>
+            <RefreshCw className={cn('h-3 w-3', loadingWeather && 'animate-spin')} />
+            {loadingWeather ? 'Fetching…' : weather ? 'Refresh' : 'Get Weather'}
+          </button>
+        </div>
+      </div>
+
+      {/* Water Factors Guide */}
+      <div className="rounded-xl border p-4" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+        <h2 className="font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>Water Factors Guide</h2>
+        <p className="text-xs mb-3" style={{ color: 'var(--color-text-muted)' }}>
+          Each drink type has a water factor — the percentage that counts toward your hydration goal.
+        </p>
+        <div className="space-y-1.5">
+          {DRINK_TYPES.map(d => (
+            <div key={d.id} className="flex items-center justify-between py-1.5 border-b last:border-0"
+              style={{ borderColor: 'var(--color-border)' }}>
+              <div className="flex items-center gap-2">
+                <span className="text-lg">{d.emoji}</span>
+                <span className="text-sm" style={{ color: 'var(--color-text-primary)' }}>{d.label}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-24 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--color-surface-2)' }}>
+                  <div className="h-full rounded-full" style={{ width: `${Math.max(0, (WATER_FACTORS[d.id] ?? 1) * 100)}%`, backgroundColor: d.color }} />
+                </div>
+                <span className="text-xs font-medium w-10 text-right" style={{ color: 'var(--color-text-secondary)' }}>
+                  {Math.round((WATER_FACTORS[d.id] ?? 1) * 100)}%
+                </span>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
@@ -303,7 +355,6 @@ export default function HydrationPage() {
   const [customDrinkType, setCustomDrinkType] = useState('water');
   const [showTemplateForm, setShowTemplateForm] = useState(false);
   const [editTemplate, setEditTemplate] = useState<any>(null);
-  const [showCalculator, setShowCalculator] = useState(false);
 
   const { data: today, isLoading } = useQuery({
     queryKey: qk.hydration.today(),
@@ -331,9 +382,8 @@ export default function HydrationPage() {
     onSuccess: () => { qc.invalidateQueries({ queryKey: qk.hydration.templates() }); success('Template deleted'); },
   });
 
-  const updateGoalMut = useMutation({
-    mutationFn: (goal: number) => api.patch('/users/me', { hydrationGoal: goal }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['hydration'] }); success('Goal updated!'); },
+  const updateProfileMut = useMutation({
+    mutationFn: (data: any) => api.patch('/users/me', data),
   });
 
   const logCustom = () => {
@@ -577,71 +627,11 @@ export default function HydrationPage() {
 
       {/* ── SETTINGS TAB ──────────────────────────────────────── */}
       {tab === 'settings' && (
-        <div className="space-y-5">
-          {/* Smart calculator */}
-          <div className="rounded-xl border p-5" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
-            <div className="flex items-start justify-between mb-3">
-              <div>
-                <h2 className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>Smart Goal Calculator</h2>
-                <p className="text-sm mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
-                  Calculates your optimal hydration based on body stats, activity level, temperature and humidity.
-                </p>
-              </div>
-              <button onClick={() => setShowCalculator(true)}
-                className="shrink-0 flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white ml-4"
-                style={{ backgroundColor: 'var(--color-accent)' }}>
-                <Calculator className="h-4 w-4" /> Calculate
-              </button>
-            </div>
-            <div className="rounded-lg p-3 text-xs" style={{ backgroundColor: 'var(--color-surface-2)', color: 'var(--color-text-muted)' }}>
-              Formula uses: weight × 35 + height adjustment × activity factor × temperature factor × humidity factor
-            </div>
-          </div>
-
-          {/* Manual goal */}
-          <div className="rounded-xl border p-5" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
-            <h2 className="font-semibold mb-3" style={{ color: 'var(--color-text-primary)' }}>Manual Daily Goal</h2>
-            <div className="flex gap-2">
-              <input type="number"
-                defaultValue={today?.goal ?? 2500}
-                id="manual-goal"
-                min={500} max={10000}
-                className="flex-1 rounded-lg border px-3 py-2 text-sm outline-none focus:border-[var(--color-accent)]"
-                style={{ backgroundColor: 'var(--color-surface-2)', borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }} />
-              <button onClick={() => {
-                const input = document.getElementById('manual-goal') as HTMLInputElement;
-                updateGoalMut.mutate(Number(input.value));
-              }} className="rounded-lg px-4 py-2 text-sm font-medium text-white"
-                style={{ backgroundColor: 'var(--color-accent)' }}>
-                Set Goal
-              </button>
-            </div>
-          </div>
-
-          {/* Water factor info */}
-          <div className="rounded-xl border p-5" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
-            <h2 className="font-semibold mb-3" style={{ color: 'var(--color-text-primary)' }}>Water Factors Guide</h2>
-            <div className="space-y-2">
-              {DRINK_TYPES.map(d => (
-                <div key={d.id} className="flex items-center justify-between py-1.5 border-b last:border-0"
-                  style={{ borderColor: 'var(--color-border)' }}>
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">{d.emoji}</span>
-                    <span className="text-sm" style={{ color: 'var(--color-text-primary)' }}>{d.label}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-24 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--color-surface-2)' }}>
-                      <div className="h-full rounded-full" style={{ width: `${Math.max(0, (WATER_FACTORS[d.id] ?? 1) * 100)}%`, backgroundColor: d.color }} />
-                    </div>
-                    <span className="text-xs font-medium w-10 text-right" style={{ color: 'var(--color-text-secondary)' }}>
-                      {Math.round((WATER_FACTORS[d.id] ?? 1) * 100)}%
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        <AutoHydrationSettings
+          todayGoal={today?.goal}
+          updateProfileMut={updateProfileMut}
+          qcClient={qc}
+        />
       )}
 
       {/* Modals */}
@@ -649,13 +639,6 @@ export default function HydrationPage() {
         <DrinkTemplateForm
           template={editTemplate}
           onClose={() => { setShowTemplateForm(false); setEditTemplate(null); }}
-        />
-      )}
-
-      {showCalculator && (
-        <GoalCalculator
-          onClose={() => setShowCalculator(false)}
-          onApply={(goal) => updateGoalMut.mutate(goal)}
         />
       )}
     </div>

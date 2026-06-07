@@ -15,6 +15,7 @@ export interface AuthUser {
   timezone: string;
   weight?: number | null;
   height?: number | null;
+  activityLevel?: string;
 }
 
 interface S {
