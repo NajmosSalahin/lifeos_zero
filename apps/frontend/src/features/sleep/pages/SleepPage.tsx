@@ -228,35 +228,6 @@ export default function SleepPage() {
           )}
         </div>
 
-        {/* Hide the second input for single-input modes */}
-        {mode === 'wakeup-cycles' && (
-          <div className="mb-5">
-            <label className="block text-xs mb-1.5" style={{ color:'var(--color-text-muted)' }}>
-              <Clock className="h-3 w-3 inline mr-1" />Sleep Cycles
-            </label>
-            <div className="flex gap-2 items-center">
-              <input type="range" min={3} max={7} step={1} value={cyclesInput}
-                onChange={e => setCyclesInput(Number(e.target.value))}
-                className="flex-1 accent-[var(--color-accent)]" />
-              <span className="text-sm font-medium w-8 text-right" style={{ color:'var(--color-text-primary)' }}>{cyclesInput}</span>
-            </div>
-            <div className="flex justify-between text-xs mt-0.5" style={{ color:'var(--color-text-muted)' }}>
-              <span>3 (4.5h)</span><span>5 (7.5h)</span><span>7 (10.5h)</span>
-            </div>
-          </div>
-        )}
-
-        {mode === 'bedtime-wakeup' && (
-          <div className="mb-5">
-            <label className="block text-xs mb-1.5" style={{ color:'var(--color-text-muted)' }}>
-              <Moon className="h-3 w-3 inline mr-1" />Bedtime
-            </label>
-            <input type="time" value={bedtimeInput} onChange={e => setBedtimeInput(e.target.value)}
-              className="w-full rounded-lg border px-3 py-2.5 text-sm outline-none focus:border-[var(--color-accent)]"
-              style={{ backgroundColor:'var(--color-surface-2)', borderColor:'var(--color-border)', color:'var(--color-text-primary)', colorScheme:'dark' }} />
-          </div>
-        )}
-
         {/* Results */}
         {result && (
           <div className="rounded-xl border-2 p-4" style={{ borderColor:'var(--color-accent)', backgroundColor:'var(--color-accent)08' }}>
