@@ -1,8 +1,9 @@
+import { memo } from 'react';
 import { type LucideIcon, TrendingUp, TrendingDown } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 interface Props { title: string; value: string|number; unit?: string; trend?: number; icon?: LucideIcon; color?: string; description?: string; className?: string; }
-export const StatCard = ({ title, value, unit, trend, icon: Icon, color, description, className }: Props) => {
+export const StatCard = memo(({ title, value, unit, trend, icon: Icon, color, description, className }: Props) => {
   const TrendIcon = trend == null ? null : trend >= 0 ? TrendingUp : TrendingDown;
   const trendColor = trend == null ? '' : trend >= 0 ? '#10b981' : '#ef4444';
   return (
@@ -26,4 +27,4 @@ export const StatCard = ({ title, value, unit, trend, icon: Icon, color, descrip
       )}
     </div>
   );
-};
+});

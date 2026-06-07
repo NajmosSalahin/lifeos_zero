@@ -1,14 +1,12 @@
 import { Bell, User, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../stores/auth.store';
-import { useUIStore } from '../../stores/ui.store';
 import { api } from '../../lib/axios';
 import { getInitials } from '../../lib/utils';
 
 export const TopBar = () => {
   const user = useAuthStore(s => s.user);
   const clearAuth = useAuthStore(s => s.clearAuth);
-  const addToast = useUIStore(s => s.addToast);
   const navigate = useNavigate();
 
   const handleLogout = async () => {

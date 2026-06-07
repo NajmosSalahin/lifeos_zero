@@ -418,12 +418,12 @@ export default function HydrationPage() {
             {t === 'today' ? '💧 today' : '🫙 drinks'}
           </button>
         ))}
-        <button onClick={() => setShowSettings(!showSettings)}
-          className={cn('pb-3 px-1 text-sm font-medium border-b-2 -mb-px transition-colors', showSettings ? 'border-[var(--color-accent)]' : 'border-transparent hover:border-[var(--color-border)]')}
-          style={{ color: showSettings ? 'var(--color-accent)' : 'var(--color-text-muted)' }}>
-          ⚙️ settings
-        </button>
       </div>
+      <button onClick={() => setShowSettings(!showSettings)}
+        className={cn('flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors border', showSettings ? 'border-[var(--color-accent)]' : 'border-[var(--color-border)]')}
+        style={{ backgroundColor:'var(--color-surface-2)', color: showSettings ? 'var(--color-accent)' : 'var(--color-text-secondary)' }}>
+        <Settings className="h-4 w-4" /> hydration settings
+      </button>
 
       {/* ── TODAY TAB ─────────────────────────────────────────── */}
       {tab === 'today' && (
@@ -631,13 +631,19 @@ export default function HydrationPage() {
         </div>
       )}
 
-      {/* ── SETTINGS ──────────────────────────────────────────── */}
+      {/* ── Settings Modal ────────────────────────────────────── */}
       {showSettings && (
-        <AutoHydrationSettings
-          todayGoal={today?.goal}
-          updateProfileMut={updateProfileMut}
-          qcClient={qc}
-        />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+          onClick={e => e.target === e.currentTarget && setShowSettings(false)}>
+          <div className="w-full max-w-lg rounded-xl border p-5 max-h-[90vh] overflow-y-auto"
+            style={{ backgroundColor:'var(--color-surface)', borderColor:'var(--color-border)' }}>
+            <AutoHydrationSettings
+              todayGoal={today?.goal}
+              updateProfileMut={updateProfileMut}
+              qcClient={qc}
+            />
+          </div>
+        </div>
       )}
 
       {/* Modals */}

@@ -6,7 +6,6 @@ import { CheckSquare, Smile, Moon, Droplets, Target, BookOpen, Wind, Zap } from 
 import { api } from '../../../shared/lib/axios';
 import { qk } from '../../../shared/lib/queryKeys';
 import { Link } from 'react-router-dom';
-import { formatMinutes } from '../../../shared/lib/utils';
 
 export default function DashboardPage() {
   const user = useAuthStore(s => s.user);
@@ -15,9 +14,7 @@ export default function DashboardPage() {
   const { data: habitsToday, isLoading: loadingHabits } = useQuery({ queryKey: qk.habits.today(), queryFn: () => api.get('/habits/logs/today').then(r => r.data.data.today) });
   const { data: moodToday } = useQuery({ queryKey: qk.mood.today(), queryFn: () => api.get('/mood/today').then(r => r.data.data.moods) });
   const { data: hydrationToday } = useQuery({ queryKey: qk.hydration.today(), queryFn: () => api.get('/hydration/today').then(r => r.data.data) });
-  const { data: sleepStats } = useQuery({ queryKey: qk.sleep.stats(), queryFn: () => api.get('/sleep/stats').then(r => r.data.data.stats) });
   const { data: goals } = useQuery({ queryKey: qk.goals.all('active'), queryFn: () => api.get('/goals?status=active').then(r => r.data.data.goals) });
-  const { data: journalStats } = useQuery({ queryKey: qk.journal.stats(), queryFn: () => api.get('/journal/stats').then(r => r.data.data.stats) });
 
   const completedHabits = habitsToday?.filter((h: any) => h.log?.completed).length ?? 0;
   const totalHabits = habitsToday?.length ?? 0;

@@ -31,6 +31,10 @@ const AppInit: FC = () => {
 
   // On mount: attempt silent token refresh to restore session
 useEffect(() => {
+  if (!isAuthenticated) {
+    setInitialized();
+    return;
+  }
   api.post('/auth/refresh', {})
     .then(async refreshRes => {
       const accessToken: string = refreshRes.data.data.accessToken;
@@ -40,7 +44,6 @@ useEffect(() => {
       setAuth(userRes.data.data.user, accessToken);
     })
     .catch(() => {
-      // No session — just mark as initialized so router can show login
       setInitialized();
     });
 }, []); // eslint-disable-line react-hooks/exhaustive-deps
