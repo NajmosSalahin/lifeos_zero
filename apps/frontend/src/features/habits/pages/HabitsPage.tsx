@@ -18,17 +18,17 @@ function HabitForm({ habit, onClose }: { habit?: any; onClose: () => void }) {
 
   const save = useMutation({
     mutationFn: (data: any) => habit ? api.patch(`/habits/${habit._id}`, data) : api.post('/habits', data),
-    onSuccess: () => { qc.invalidateQueries({queryKey:['habits']}); success(habit?'Habit updated':'Habit created'); onClose(); },
+    onSuccess: () => { qc.invalidateQueries({queryKey:['habits']}); success(habit?'habit updated':'habit created'); onClose(); },
     onError: (e:any) => error(e?.response?.data?.error?.message||'Failed'),
   });
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={e => e.target===e.currentTarget&&onClose()}>
       <div className="w-full max-w-md rounded-2xl border p-6" style={{ backgroundColor:'var(--color-surface)', borderColor:'var(--color-border)' }}>
-        <h2 className="text-lg font-semibold mb-4" style={{ color:'var(--color-text-primary)' }}>{habit?'Edit Habit':'New Habit'}</h2>
+        <h2 className="text-lg font-semibold mb-4" style={{ color:'var(--color-text-primary)' }}>{habit?'edit habit':'new habit'}</h2>
         <div className="space-y-3">
-          <input value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))} placeholder="Habit name" className="w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-[var(--color-accent)]" style={{ backgroundColor:'var(--color-surface-2)', borderColor:'var(--color-border)', color:'var(--color-text-primary)' }} />
-          <input value={form.description} onChange={e=>setForm(f=>({...f,description:e.target.value}))} placeholder="Description (optional)" className="w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-[var(--color-accent)]" style={{ backgroundColor:'var(--color-surface-2)', borderColor:'var(--color-border)', color:'var(--color-text-primary)' }} />
+          <input value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))} placeholder="habit name" className="w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-[var(--color-accent)]" style={{ backgroundColor:'var(--color-surface-2)', borderColor:'var(--color-border)', color:'var(--color-text-primary)' }} />
+          <input value={form.description} onChange={e=>setForm(f=>({...f,description:e.target.value}))} placeholder="description (optional)" className="w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-[var(--color-accent)]" style={{ backgroundColor:'var(--color-surface-2)', borderColor:'var(--color-border)', color:'var(--color-text-primary)' }} />
           <div className="grid grid-cols-2 gap-3">
             <select value={form.category} onChange={e=>setForm(f=>({...f,category:e.target.value}))} className="rounded-lg border px-3 py-2 text-sm outline-none" style={{ backgroundColor:'var(--color-surface-2)', borderColor:'var(--color-border)', color:'var(--color-text-primary)' }}>
               {CATEGORIES.slice(1).map(c=><option key={c} value={c}>{c}</option>)}
@@ -38,17 +38,17 @@ function HabitForm({ habit, onClose }: { habit?: any; onClose: () => void }) {
             </select>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <input type="number" value={form.targetCount} onChange={e=>setForm(f=>({...f,targetCount:Number(e.target.value)}))} min={1} placeholder="Target count" className="rounded-lg border px-3 py-2 text-sm outline-none" style={{ backgroundColor:'var(--color-surface-2)', borderColor:'var(--color-border)', color:'var(--color-text-primary)' }} />
-            <input value={form.unit} onChange={e=>setForm(f=>({...f,unit:e.target.value}))} placeholder="Unit (times, mins…)" className="rounded-lg border px-3 py-2 text-sm outline-none" style={{ backgroundColor:'var(--color-surface-2)', borderColor:'var(--color-border)', color:'var(--color-text-primary)' }} />
+            <input type="number" value={form.targetCount} onChange={e=>setForm(f=>({...f,targetCount:Number(e.target.value)}))} min={1} placeholder="target count" className="rounded-lg border px-3 py-2 text-sm outline-none" style={{ backgroundColor:'var(--color-surface-2)', borderColor:'var(--color-border)', color:'var(--color-text-primary)' }} />
+            <input value={form.unit} onChange={e=>setForm(f=>({...f,unit:e.target.value}))} placeholder="unit (times, mins…)" className="rounded-lg border px-3 py-2 text-sm outline-none" style={{ backgroundColor:'var(--color-surface-2)', borderColor:'var(--color-border)', color:'var(--color-text-primary)' }} />
           </div>
           <div className="flex gap-2 flex-wrap">
             {COLORS.map(c=><button key={c} type="button" onClick={()=>setForm(f=>({...f,color:c}))} className="h-6 w-6 rounded-full border-2 transition-transform hover:scale-110" style={{ backgroundColor:c, borderColor: form.color===c?'var(--color-text-primary)':'transparent' }} />)}
           </div>
         </div>
         <div className="flex gap-2 mt-5">
-          <button onClick={onClose} className="flex-1 rounded-lg border py-2 text-sm" style={{ borderColor:'var(--color-border)', color:'var(--color-text-secondary)' }}>Cancel</button>
+          <button onClick={onClose} className="flex-1 rounded-lg border py-2 text-sm" style={{ borderColor:'var(--color-border)', color:'var(--color-text-secondary)' }}>cancel</button>
           <button onClick={()=>save.mutate(form)} disabled={!form.name||save.isPending} className="flex-1 rounded-lg py-2 text-sm font-medium text-white disabled:opacity-50" style={{ backgroundColor:'var(--color-accent)' }}>
-            {save.isPending?'Saving…':'Save'}
+            {save.isPending?'saving…':'save'}
           </button>
         </div>
       </div>
@@ -74,12 +74,12 @@ export default function HabitsPage() {
 
   const archiveMut = useMutation({
     mutationFn: (id: string) => api.patch(`/habits/${id}/archive`, { archive: true }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['habits'] }); success('Habit archived'); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['habits'] }); success('habit archived'); },
   });
 
   const deleteMut = useMutation({
     mutationFn: (id: string) => api.delete(`/habits/${id}`),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['habits'] }); success('Habit deleted'); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['habits'] }); success('habit deleted'); },
   });
 
   const filtered = todayData?.filter((item: any) => activeCategory === 'all' || item.habit.category === activeCategory) ?? [];
@@ -88,13 +88,13 @@ export default function HabitsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color:'var(--color-text-primary)' }}>Habits</h1>
+          <h1 className="text-2xl font-bold" style={{ color:'var(--color-text-primary)' }}>habits</h1>
           <p className="text-sm mt-0.5" style={{ color:'var(--color-text-muted)' }}>
             {filtered.filter((i:any)=>i.log?.completed).length}/{filtered.length} completed today
           </p>
         </div>
         <button onClick={()=>{setEditHabit(null);setShowForm(true)}} className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white" style={{ backgroundColor:'var(--color-accent)' }}>
-          <Plus className="h-4 w-4" /> New Habit
+          <Plus className="h-4 w-4" /> new habit
         </button>
       </div>
 
@@ -110,7 +110,7 @@ export default function HabitsPage() {
 
       {/* Habits list */}
       {isLoading ? <SkeletonList count={4} /> : filtered.length === 0 ? (
-        <EmptyState icon={CheckCircle} title="No habits yet" description="Create your first habit to start tracking." action={{ label:'Create habit', onClick:()=>setShowForm(true) }} />
+        <EmptyState icon={CheckCircle} title="no habits yet" description="create your first habit to start tracking." action={{ label:'create habit', onClick:()=>setShowForm(true) }} />
       ) : (
         <div className="space-y-3">
           {filtered.map((item: any) => {
@@ -149,7 +149,7 @@ export default function HabitsPage() {
                   <button onClick={()=>archiveMut.mutate(habit._id)} className="rounded-lg p-1.5 transition-colors hover:bg-[var(--color-surface-2)]" style={{ color:'var(--color-text-muted)' }}>
                     <Archive className="h-3.5 w-3.5" />
                   </button>
-                  <button onClick={()=>{ if(confirm('Delete habit and all logs?')) deleteMut.mutate(habit._id); }} className="rounded-lg p-1.5 transition-colors hover:bg-[var(--color-surface-2)] hover:text-rose-400" style={{ color:'var(--color-text-muted)' }}>
+                  <button onClick={()=>{ if(confirm('delete habit and all logs?')) deleteMut.mutate(habit._id); }} className="rounded-lg p-1.5 transition-colors hover:bg-[var(--color-surface-2)] hover:text-rose-400" style={{ color:'var(--color-text-muted)' }}>
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
                 </div>

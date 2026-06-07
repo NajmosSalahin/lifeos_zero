@@ -33,7 +33,7 @@ export default function CalendarPage() {
 
   return (
     <div className="space-y-6">
-      <div><h1 className="text-2xl font-bold" style={{ color:'var(--color-text-primary)' }}>Calendar</h1><p className="text-sm mt-0.5" style={{ color:'var(--color-text-muted)' }}>Your activity history at a glance</p></div>
+      <div><h1 className="text-2xl font-bold" style={{ color:'var(--color-text-primary)' }}>calendar</h1><p className="text-sm mt-0.5" style={{ color:'var(--color-text-muted)' }}>your activity history at a glance</p></div>
 
       <div className="rounded-xl border overflow-hidden" style={{ backgroundColor:'var(--color-surface)', borderColor:'var(--color-border)' }}>
         {/* Header */}
@@ -106,7 +106,7 @@ export default function CalendarPage() {
           <div className="space-y-4">
             {dayData.habits?.filter((h: any) => h.completed).length > 0 && (
               <div>
-                <p className="text-xs font-semibold mb-2" style={{ color:'var(--color-text-muted)' }}>HABITS</p>
+                <p className="text-xs font-semibold mb-2" style={{ color:'var(--color-text-muted)' }}>habits</p>
                 <div className="flex flex-wrap gap-2">
                   {dayData.habits.filter((h: any) => h.completed).map((h: any) => (
                     <span key={h._id} className="text-xs px-2.5 py-1 rounded-full" style={{ backgroundColor:'#6366f120', color:'#6366f1' }}>
@@ -118,7 +118,7 @@ export default function CalendarPage() {
             )}
             {dayData.moods?.length > 0 && (
               <div>
-                <p className="text-xs font-semibold mb-2" style={{ color:'var(--color-text-muted)' }}>MOOD</p>
+                <p className="text-xs font-semibold mb-2" style={{ color:'var(--color-text-muted)' }}>mood</p>
                 <div className="flex gap-2">
                   {dayData.moods.map((m: any) => (
                     <span key={m._id} className="text-sm px-3 py-1 rounded-full font-medium" style={{ backgroundColor:'#f59e0b20', color:'#f59e0b' }}>
@@ -130,7 +130,7 @@ export default function CalendarPage() {
             )}
             {dayData.sleep?.length > 0 && (
               <div>
-                <p className="text-xs font-semibold mb-2" style={{ color:'var(--color-text-muted)' }}>SLEEP</p>
+                <p className="text-xs font-semibold mb-2" style={{ color:'var(--color-text-muted)' }}>sleep</p>
                 {dayData.sleep.map((s: any) => {
                   const dur = Math.round((new Date(s.wakeTime).getTime() - new Date(s.bedtime).getTime()) / 60000);
                   return <span key={s._id} className="text-xs px-2.5 py-1 rounded-full" style={{ backgroundColor:'#8b5cf620', color:'#8b5cf6' }}>{formatMinutes(dur)} · ⭐{s.quality}/5</span>;
@@ -139,7 +139,7 @@ export default function CalendarPage() {
             )}
             {dayData.hydration?.length > 0 && (
               <div>
-                <p className="text-xs font-semibold mb-2" style={{ color:'var(--color-text-muted)' }}>HYDRATION</p>
+                <p className="text-xs font-semibold mb-2" style={{ color:'var(--color-text-muted)' }}>hydration</p>
                 <span className="text-xs px-2.5 py-1 rounded-full" style={{ backgroundColor:'#3b82f620', color:'#3b82f6' }}>
                   {dayData.hydration.reduce((s: number, h: any) => s + h.amountMl, 0)}ml
                 </span>
@@ -147,7 +147,7 @@ export default function CalendarPage() {
             )}
             {dayData.journal?.length > 0 && (
               <div>
-                <p className="text-xs font-semibold mb-2" style={{ color:'var(--color-text-muted)' }}>JOURNAL</p>
+                <p className="text-xs font-semibold mb-2" style={{ color:'var(--color-text-muted)' }}>journal</p>
                 <div className="space-y-1">
                   {dayData.journal.map((e: any) => (
                     <p key={e._id} className="text-xs" style={{ color:'var(--color-text-secondary)' }}>📝 {e.title}</p>
@@ -156,7 +156,7 @@ export default function CalendarPage() {
               </div>
             )}
             {!dayData.habits?.length && !dayData.moods?.length && !dayData.sleep?.length && !dayData.hydration?.length && !dayData.journal?.length && (
-              <p className="text-sm text-center py-4" style={{ color:'var(--color-text-muted)' }}>No activity on this day</p>
+              <p className="text-sm text-center py-4" style={{ color:'var(--color-text-muted)' }}>no activity on this day</p>
             )}
           </div>
         </div>

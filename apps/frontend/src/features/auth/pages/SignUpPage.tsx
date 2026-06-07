@@ -12,7 +12,7 @@ const schema = z.object({
   firstName: z.string().min(1).max(64),
   lastName:  z.string().min(1).max(64),
   email:     z.string().email(),
-  password:  z.string().min(8).regex(/[A-Z]/, 'Needs uppercase').regex(/[0-9]/, 'Needs number'),
+  password:  z.string().min(8).regex(/[A-Z]/, 'needs uppercase').regex(/[0-9]/, 'needs number'),
 });
 type F = z.infer<typeof schema>;
 
@@ -28,7 +28,7 @@ export default function SignUpPage() {
     try {
       await api.post('/auth/register', data);
     } catch (e: any) {
-      toastError(e?.response?.data?.error?.message || 'Registration failed');
+      toastError(e?.response?.data?.error?.message || 'registration failed');
       setLoading(false);
       return;
     }
@@ -41,7 +41,7 @@ export default function SignUpPage() {
       success('Account created!');
       navigate('/dashboard');
     } catch (e: any) {
-      toastError('Account created but login failed. Please sign in manually.');
+      toastError('account created but login failed. please sign in manually.');
       navigate('/login');
     } finally {
       setLoading(false);
@@ -77,15 +77,15 @@ export default function SignUpPage() {
           </div>
         </div>
         <div className="rounded-2xl border p-8" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
-          <h1 className="text-2xl font-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>Create account</h1>
-          <p className="text-sm mb-6" style={{ color: 'var(--color-text-muted)' }}>Start your personal life OS</p>
+          <h1 className="text-2xl font-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>create account</h1>
+          <p className="text-sm mb-6" style={{ color: 'var(--color-text-muted)' }}>start your personal life os</p>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
-              <Field name="firstName" label="First name" placeholder="John" />
-              <Field name="lastName"  label="Last name"  placeholder="Doe" />
+              <Field name="firstName" label="first name" placeholder="john" />
+              <Field name="lastName"  label="last name"  placeholder="doe" />
             </div>
-            <Field name="email"    label="Email"    type="email"    placeholder="you@example.com" />
-            <Field name="password" label="Password" type="password" placeholder="Min 8 chars, 1 uppercase, 1 number" />
+            <Field name="email"    label="email"    type="email"    placeholder="you@example.com" />
+            <Field name="password" label="password" type="password" placeholder="min 8 chars, 1 uppercase, 1 number" />
             <button
               type="submit"
               disabled={loading}
@@ -93,13 +93,13 @@ export default function SignUpPage() {
               style={{ backgroundColor: 'var(--color-accent)' }}
             >
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-              Create account
+              create account
             </button>
           </form>
           <p className="text-center text-sm mt-5" style={{ color: 'var(--color-text-muted)' }}>
-            Already have an account?{' '}
+            already have an account?{' '}
             <Link to="/login" className="font-medium hover:underline" style={{ color: 'var(--color-accent)' }}>
-              Sign in
+              sign in
             </Link>
           </p>
         </div>

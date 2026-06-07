@@ -60,8 +60,8 @@ function calculateFromWakeupCycles(wakeUp: string, cycles: number) {
 
 function calculateFromBedtimeWakeup(bedtime: string, wakeUp: string) {
   const rawDuration = calculateDurationMinutes(bedtime, wakeUp);
-  const rawCycles = Math.round((rawDuration - FALL_ASLEEP_MINUTES) / CYCLE_MINUTES * 2) / 2;
-  const snappedCycles = Math.max(0.5, Math.min(7, rawCycles));
+  const rawCycles = (rawDuration - FALL_ASLEEP_MINUTES) / CYCLE_MINUTES;
+  const snappedCycles = Math.max(1, Math.min(7, Math.round(rawCycles)));
   const snappedDuration = snappedCycles * CYCLE_MINUTES;
   const totalInBed = snappedDuration + FALL_ASLEEP_MINUTES;
   const snappedWakeMins = (timeToMinutes(bedtime) + totalInBed) % 1440;
@@ -87,10 +87,133 @@ function calculateFromBedtimeCycles(bedtime: string, cycles: number) {
   return { bedtime, wakeUp, duration, hours, cycles, prompt };
 }
 
+// ── Log Sleep Form ────────────────────────────────────────────────
+function LogSleepForm({ form, setForm, onSave, onCancel, isPending }: { form: any; setForm: any; onSave: () => void; onCancel: () => void; isPending: boolean }) {
+  const cycleInfo = (() => {
+    try {
+      const rawDuration = calculateDurationMinutes(form.bedtime, form.wakeTime);
+      const rawCycles = (rawDuration - FALL_ASLEEP_MINUTES) / CYCLE_MINUTES;
+      const rounded = Math.round(rawCycles);
+      const isExact = Math.abs(rawCycles - rounded) < 0.01;
+      const below = Math.floor(rawCycles);
+      const above = Math.ceil(rawCycles);
+      const closest = isExact ? rounded : (Math.abs(rawCycles - below) <= Math.abs(rawCycles - above) ? below : above);
+      return {
+        duration: rawDuration,
+        rawCycles,
+        below: { cycles: below, diff: Math.abs(rawCycles - below) },
+        above: { cycles: above, diff: Math.abs(rawCycles - above) },
+        closest,
+        isExact,
+        hours: rawDuration / 60,
+      };
+    } catch { return null; }
+  })();
+
+  return (
+    <div className="rounded-xl border p-5 animate-fade-in" style={{ backgroundColor:'var(--color-surface)', borderColor:'var(--color-border)' }}>
+      <h2 className="font-semibold mb-4" style={{ color:'var(--color-text-primary)' }}>log sleep</h2>
+
+      {/* Date + Times */}
+      <div className="grid grid-cols-3 gap-3 mb-4">
+        <div>
+          <label className="block text-xs mb-1.5" style={{ color:'var(--color-text-muted)' }}>date</label>
+          <input type="date" value={form.date} onChange={e => setForm((f: any) => ({...f, date: e.target.value}))}
+            className="w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-[var(--color-accent)]"
+            style={{ backgroundColor:'var(--color-surface-2)', borderColor:'var(--color-border)', color:'var(--color-text-primary)', colorScheme:'dark' }} />
+        </div>
+        <div>
+          <label className="block text-xs mb-1.5" style={{ color:'var(--color-text-muted)' }}>bedtime</label>
+          <input type="time" value={form.bedtime} onChange={e => setForm((f: any) => ({...f, bedtime: e.target.value}))}
+            className="w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-[var(--color-accent)]"
+            style={{ backgroundColor:'var(--color-surface-2)', borderColor:'var(--color-border)', color:'var(--color-text-primary)', colorScheme:'dark' }} />
+        </div>
+        <div>
+          <label className="block text-xs mb-1.5" style={{ color:'var(--color-text-muted)' }}>wake time</label>
+          <input type="time" value={form.wakeTime} onChange={e => setForm((f: any) => ({...f, wakeTime: e.target.value}))}
+            className="w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-[var(--color-accent)]"
+            style={{ backgroundColor:'var(--color-surface-2)', borderColor:'var(--color-border)', color:'var(--color-text-primary)', colorScheme:'dark' }} />
+        </div>
+      </div>
+
+      {/* Cycle info */}
+      {cycleInfo && cycleInfo.duration > 0 && (
+        <div className="rounded-lg p-3 mb-4" style={{ backgroundColor:'var(--color-surface-2)' }}>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold uppercase tracking-wider" style={{ color:'var(--color-text-muted)' }}>Sleep Cycles</span>
+            <span className="text-sm font-bold tabular-nums" style={{ color:'var(--color-accent)' }}>
+              ~{cycleInfo.rawCycles.toFixed(1)} cycles
+            </span>
+          </div>
+          <div className="text-xs space-y-1">
+            {cycleInfo.isExact ? (
+              <div className="flex items-center gap-2 px-2 py-1 rounded" style={{ color:'#22c55e' }}>
+                <span>✅</span>
+                <span>matches a complete sleep cycle!</span>
+              </div>
+            ) : (
+              <>
+                {cycleInfo.below.cycles >= 1 && (
+                  <div className={cn('flex items-center justify-between px-2 py-1 rounded', cycleInfo.closest === cycleInfo.below.cycles ? 'bg-[var(--color-accent)]15' : '')}>
+                    <span style={{ color: cycleInfo.closest === cycleInfo.below.cycles ? 'var(--color-accent)' : 'var(--color-text-secondary)' }}>
+                      △ Wake {minutesToTime(timeToMinutes(form.wakeTime) - (cycleInfo.rawCycles - cycleInfo.below.cycles) * CYCLE_MINUTES)} → {cycleInfo.below.cycles} cycles ({formatMinutes(cycleInfo.below.cycles * CYCLE_MINUTES)})
+                    </span>
+                    {cycleInfo.closest === cycleInfo.below.cycles && <span className="text-[10px] font-medium" style={{ color:'var(--color-accent)' }}>closest</span>}
+                  </div>
+                )}
+                {cycleInfo.above.cycles <= 7 && (
+                  <div className={cn('flex items-center justify-between px-2 py-1 rounded', cycleInfo.closest === cycleInfo.above.cycles ? 'bg-[var(--color-accent)]15' : '')}>
+                    <span style={{ color: cycleInfo.closest === cycleInfo.above.cycles ? 'var(--color-accent)' : 'var(--color-text-secondary)' }}>
+                      ▽ Wake {minutesToTime(timeToMinutes(form.wakeTime) + (cycleInfo.above.cycles - cycleInfo.rawCycles) * CYCLE_MINUTES)} → {cycleInfo.above.cycles} cycles ({formatMinutes(cycleInfo.above.cycles * CYCLE_MINUTES)})
+                    </span>
+                    {cycleInfo.closest === cycleInfo.above.cycles && <span className="text-[10px] font-medium" style={{ color:'var(--color-accent)' }}>closest</span>}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Quality */}
+      <div className="mb-4">
+        <label className="block text-xs mb-2" style={{ color:'var(--color-text-muted)' }}>quality</label>
+        <div className="flex gap-1.5">
+          {[1,2,3,4,5].map(q => (
+            <button key={q} onClick={() => setForm((f: any) => ({...f, quality: q}))}
+              className="p-1.5 rounded-lg transition-all hover:scale-110">
+              <Star className="h-5 w-5" fill={q <= form.quality ? 'var(--color-accent)' : 'none'}
+                stroke={q <= form.quality ? 'var(--color-accent)' : 'var(--color-border)'} />
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Note */}
+      <textarea value={form.note} onChange={e => setForm((f: any) => ({...f, note: e.target.value}))}
+        placeholder="how was your sleep? (optional)" rows={2}
+        className="w-full rounded-lg border px-3 py-2 text-sm outline-none resize-none focus:border-[var(--color-accent)] mb-4"
+        style={{ backgroundColor:'var(--color-surface-2)', borderColor:'var(--color-border)', color:'var(--color-text-primary)' }} />
+
+      {/* Actions */}
+      <div className="flex gap-2">
+        <button onClick={onCancel} className="flex-1 rounded-lg border py-2 text-sm transition-colors hover:bg-[var(--color-surface-2)]"
+          style={{ borderColor:'var(--color-border)', color:'var(--color-text-secondary)' }}>cancel</button>
+        <button onClick={onSave} disabled={!form.date || !form.bedtime || !form.wakeTime || isPending}
+          className="flex-1 rounded-lg py-2 text-sm font-medium text-white disabled:opacity-50 transition-opacity"
+          style={{ backgroundColor:'var(--color-accent)' }}>
+          {isPending ? 'saving…' : 'save'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function SleepPage() {
+  const todayStr = new Date().toISOString().slice(0, 10);
   const [showLog, setShowLog] = useState(false);
   const [showCalculator, setShowCalculator] = useState(false);
-  const [form, setForm] = useState({ bedtime: '', wakeTime: '', quality: 4, note: '' });
+  const [form, setForm] = useState({ date: todayStr, bedtime: '23:00', wakeTime: '07:00', quality: 4, note: '' });
   const qc = useQueryClient();
   const { success, error } = useToast();
 
@@ -104,8 +227,17 @@ export default function SleepPage() {
   const { data: statsData } = useQuery({ queryKey: qk.sleep.stats(), queryFn: () => api.get('/sleep/stats').then(r => r.data.data.stats) });
 
   const logMut = useMutation({
-    mutationFn: () => api.post('/sleep', form),
-    onSuccess: () => { qc.invalidateQueries({queryKey:['sleep']}); success('Sleep logged!'); setShowLog(false); setForm({ bedtime:'', wakeTime:'', quality:4, note:'' }); },
+    mutationFn: () => {
+      const bedtimeISO = new Date(`${form.date}T${form.bedtime}:00`).toISOString();
+      let wakeISO = new Date(`${form.date}T${form.wakeTime}:00`).toISOString();
+      if (form.wakeTime <= form.bedtime) {
+        const next = new Date(`${form.date}T${form.wakeTime}:00`);
+        next.setDate(next.getDate() + 1);
+        wakeISO = next.toISOString();
+      }
+      return api.post('/sleep', { ...form, bedtime: bedtimeISO, wakeTime: wakeISO });
+    },
+    onSuccess: () => { qc.invalidateQueries({queryKey:['sleep']}); success('Sleep logged!'); setShowLog(false); },
     onError: (e:any) => error(e?.response?.data?.error?.message||'Failed'),
   });
 
@@ -161,33 +293,35 @@ export default function SleepPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color:'var(--color-text-primary)' }}>Sleep</h1>
-          <p className="text-sm mt-0.5" style={{ color:'var(--color-text-muted)' }}>Track your sleep patterns</p>
+          <h1 className="text-2xl font-bold" style={{ color:'var(--color-text-primary)' }}>sleep</h1>
+          <p className="text-sm mt-0.5" style={{ color:'var(--color-text-muted)' }}>track your sleep patterns</p>
         </div>
         <div className="flex gap-2">
           <button onClick={()=>setShowCalculator(!showCalculator)}
             className={cn('flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors border', showCalculator ? 'border-[var(--color-accent)]' : 'border-[var(--color-border)]')}
             style={{ backgroundColor:'var(--color-surface-2)', color: showCalculator ? 'var(--color-accent)' : 'var(--color-text-secondary)' }}>
-            <Settings className="h-4 w-4" /> Cycles
+            <Settings className="h-4 w-4" /> cycles
           </button>
           <button onClick={()=>setShowLog(!showLog)} className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white" style={{ backgroundColor:'var(--color-accent)' }}>
-            <Plus className="h-4 w-4" /> Log Sleep
+            <Plus className="h-4 w-4" /> log sleep
           </button>
         </div>
       </div>
 
       <div className="grid grid-cols-3 gap-4">
-        <StatCard title="Avg Duration" value={statsData ? formatMinutes(statsData.averageDuration) : '--'} icon={Moon} color="#8b5cf6" description="per night" />
-        <StatCard title="Avg Quality" value={statsData?.averageQuality??'--'} unit="/5" icon={Star} color="#f59e0b" description="rating" />
-        <StatCard title="Total Sessions" value={statsData?.totalSessions??'--'} description="logged" />
+        <StatCard title="avg duration" value={statsData ? formatMinutes(statsData.averageDuration) : '--'} icon={Moon} color="#8b5cf6" description="per night" />
+        <StatCard title="avg quality" value={statsData?.averageQuality??'--'} unit="/5" icon={Star} color="#f59e0b" description="rating" />
+        <StatCard title="total sessions" value={statsData?.totalSessions??'--'} description="logged" />
       </div>
 
-      {/* ── Sleep Cycle Calculator ─────────────────────────────── */}
+      {/* ── Sleep Cycle Calculator Modal ───────────────────────── */}
       {showCalculator && (
-      <div className="rounded-xl border p-5" style={{ backgroundColor:'var(--color-surface)', borderColor:'var(--color-border)' }}>
-        <h2 className="font-semibold mb-1" style={{ color:'var(--color-text-primary)' }}>Sleep Cycle Calculator</h2>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+        onClick={e => e.target === e.currentTarget && setShowCalculator(false)}>
+        <div className="w-full max-w-lg rounded-xl border p-5 max-h-[90vh] overflow-y-auto" style={{ backgroundColor:'var(--color-surface)', borderColor:'var(--color-border)' }}>
+        <h2 className="font-semibold mb-1" style={{ color:'var(--color-text-primary)' }}>sleep cycle calculator</h2>
         <p className="text-xs mb-4" style={{ color:'var(--color-text-muted)' }}>
-          Each sleep cycle lasts ~90 minutes. The ideal bedtime ensures you wake up at the end of a full cycle.
+          each sleep cycle lasts ~90 minutes. the ideal bedtime ensures you wake up at the end of a full cycle.
         </p>
 
         {/* Mode selector */}
@@ -207,7 +341,7 @@ export default function SleepPage() {
           {(mode === 'wakeup-cycles' || mode === 'bedtime-wakeup') && (
             <div>
               <label className="block text-xs mb-1.5" style={{ color:'var(--color-text-muted)' }}>
-                <Sunrise className="h-3 w-3 inline mr-1" />Wake-up Time
+                <Sunrise className="h-3 w-3 inline mr-1" />wake-up time
               </label>
               <input type="time" value={wakeUpInput} onChange={e => setWakeUpInput(e.target.value)}
                 className="w-full rounded-lg border px-3 py-2.5 text-sm outline-none focus:border-[var(--color-accent)]"
@@ -217,7 +351,7 @@ export default function SleepPage() {
           {(mode === 'bedtime-wakeup' || mode === 'bedtime-cycles') && (
             <div>
               <label className="block text-xs mb-1.5" style={{ color:'var(--color-text-muted)' }}>
-                <Moon className="h-3 w-3 inline mr-1" />Bedtime
+                <Moon className="h-3 w-3 inline mr-1" />bedtime
               </label>
               <input type="time" value={bedtimeInput} onChange={e => setBedtimeInput(e.target.value)}
                 className="w-full rounded-lg border px-3 py-2.5 text-sm outline-none focus:border-[var(--color-accent)]"
@@ -227,7 +361,7 @@ export default function SleepPage() {
           {(mode === 'wakeup-cycles' || mode === 'bedtime-cycles') && (
             <div>
               <label className="block text-xs mb-1.5" style={{ color:'var(--color-text-muted)' }}>
-                <Clock className="h-3 w-3 inline mr-1" />Sleep Cycles
+                <Clock className="h-3 w-3 inline mr-1" />sleep cycles
               </label>
               <div className="flex gap-2 items-center">
                 <input type="range" min={0.5} max={7} step={0.5} value={cyclesInput}
@@ -248,22 +382,22 @@ export default function SleepPage() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center mb-3">
               {mode !== 'bedtime-wakeup' && (
                 <div>
-                  <p className="text-xs mb-0.5" style={{ color:'var(--color-text-muted)' }}>Bedtime</p>
+                  <p className="text-xs mb-0.5" style={{ color:'var(--color-text-muted)' }}>bedtime</p>
                   <p className="text-lg font-bold tabular-nums" style={{ color:'var(--color-accent)' }}>{result.bedtime}</p>
                 </div>
               )}
               {mode !== 'bedtime-cycles' && (
                 <div>
-                  <p className="text-xs mb-0.5" style={{ color:'var(--color-text-muted)' }}>Wake-up</p>
+                  <p className="text-xs mb-0.5" style={{ color:'var(--color-text-muted)' }}>wake-up</p>
                   <p className="text-lg font-bold tabular-nums" style={{ color:'var(--color-accent)' }}>{result.wakeUp}</p>
                 </div>
               )}
               <div>
-                <p className="text-xs mb-0.5" style={{ color:'var(--color-text-muted)' }}>Duration</p>
+                <p className="text-xs mb-0.5" style={{ color:'var(--color-text-muted)' }}>duration</p>
                 <p className="text-lg font-bold tabular-nums" style={{ color:'var(--color-accent)' }}>{formatMinutes(result.duration)}</p>
               </div>
               <div>
-                <p className="text-xs mb-0.5" style={{ color:'var(--color-text-muted)' }}>Cycles</p>
+                <p className="text-xs mb-0.5" style={{ color:'var(--color-text-muted)' }}>cycles</p>
                 <p className="text-lg font-bold tabular-nums" style={{ color:'var(--color-accent)' }}>{result.cycles}</p>
               </div>
             </div>
@@ -287,58 +421,32 @@ export default function SleepPage() {
             <button onClick={applyToSchedule}
               className="mt-3 w-full rounded-lg py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
               style={{ backgroundColor:'var(--color-accent)' }}>
-              Apply to Schedule
+              apply to schedule
             </button>
           </div>
         )}
+        </div>
       </div>
       )}
 
-      {/* ── Log Form ───────────────────────────────────────────── */}
+      {/* ── Log Form Modal ────────────────────────────────────── */}
       {showLog && (
-        <div className="rounded-xl border p-5" style={{ backgroundColor:'var(--color-surface)', borderColor:'var(--color-border)' }}>
-          <h2 className="font-semibold mb-4" style={{ color:'var(--color-text-primary)' }}>Log Sleep</h2>
-          <div className="grid grid-cols-2 gap-3 mb-3">
-            <div>
-              <label className="block text-xs mb-1" style={{ color:'var(--color-text-muted)' }}>Bedtime</label>
-              <input type="datetime-local" value={form.bedtime} onChange={e=>setForm(f=>({...f,bedtime:e.target.value}))}
-                className="w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-[var(--color-accent)]"
-                style={{ backgroundColor:'var(--color-surface-2)', borderColor:'var(--color-border)', color:'var(--color-text-primary)' }} />
-            </div>
-            <div>
-              <label className="block text-xs mb-1" style={{ color:'var(--color-text-muted)' }}>Wake time</label>
-              <input type="datetime-local" value={form.wakeTime} onChange={e=>setForm(f=>({...f,wakeTime:e.target.value}))}
-                className="w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-[var(--color-accent)]"
-                style={{ backgroundColor:'var(--color-surface-2)', borderColor:'var(--color-border)', color:'var(--color-text-primary)' }} />
-            </div>
-          </div>
-          <div className="mb-3">
-            <label className="block text-xs mb-1" style={{ color:'var(--color-text-muted)' }}>Quality (1–5)</label>
-            <div className="flex gap-2">
-              {[1,2,3,4,5].map(q=>(
-                <button key={q} onClick={()=>setForm(f=>({...f,quality:q}))} className="flex-1 rounded-lg py-2 text-sm font-medium transition-colors"
-                  style={{ backgroundColor: form.quality===q ? 'var(--color-accent)' : 'var(--color-surface-2)', color: form.quality===q ? '#fff' : 'var(--color-text-secondary)' }}>
-                  {'⭐'.repeat(q)}
-                </button>
-              ))}
-            </div>
-          </div>
-          <textarea value={form.note} onChange={e=>setForm(f=>({...f,note:e.target.value}))} placeholder="Notes (optional)" rows={2}
-            className="w-full rounded-lg border px-3 py-2 text-sm outline-none resize-none focus:border-[var(--color-accent)] mb-4"
-            style={{ backgroundColor:'var(--color-surface-2)', borderColor:'var(--color-border)', color:'var(--color-text-primary)' }} />
-          <div className="flex gap-2">
-            <button onClick={()=>setShowLog(false)} className="flex-1 rounded-lg border py-2 text-sm" style={{ borderColor:'var(--color-border)', color:'var(--color-text-secondary)' }}>Cancel</button>
-            <button onClick={()=>logMut.mutate()} disabled={!form.bedtime||!form.wakeTime||logMut.isPending} className="flex-1 rounded-lg py-2 text-sm font-medium text-white disabled:opacity-50" style={{ backgroundColor:'var(--color-accent)' }}>
-              {logMut.isPending?'Saving…':'Save'}
-            </button>
-          </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+          onClick={e => e.target === e.currentTarget && setShowLog(false)}>
+          <LogSleepForm
+            form={form}
+            setForm={setForm}
+            onSave={() => logMut.mutate()}
+            onCancel={() => setShowLog(false)}
+            isPending={logMut.isPending}
+          />
         </div>
       )}
 
       {/* ── Chart ──────────────────────────────────────────────── */}
       {chartData.length > 1 && (
         <div className="rounded-xl border p-5" style={{ backgroundColor:'var(--color-surface)', borderColor:'var(--color-border)' }}>
-          <h2 className="font-semibold mb-4" style={{ color:'var(--color-text-primary)' }}>Sleep Duration (hours)</h2>
+          <h2 className="font-semibold mb-4" style={{ color:'var(--color-text-primary)' }}>sleep duration (hours)</h2>
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={chartData} barSize={20}>
               <XAxis dataKey="date" tick={{ fontSize:10, fill:'var(--color-text-muted)' }} tickLine={false} axisLine={false} />
@@ -352,7 +460,7 @@ export default function SleepPage() {
 
       {/* ── Log History ────────────────────────────────────────── */}
       <div className="space-y-2">
-        {items.length === 0 && <EmptyState icon={Moon} title="No sleep logs yet" description="Track your first night of sleep." />}
+        {items.length === 0 && <EmptyState icon={Moon} title="no sleep logs yet" description="track your first night of sleep." />}
         {items.map((s: any) => {
           const dur = Math.round((new Date(s.wakeTime).getTime()-new Date(s.bedtime).getTime())/60000);
           return (

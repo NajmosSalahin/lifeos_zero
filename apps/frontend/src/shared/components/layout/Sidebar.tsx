@@ -4,16 +4,16 @@ import { usePreferencesStore } from '../../stores/preferences.store';
 import { cn } from '../../lib/utils';
 
 const NAV = [
-  { to:'/dashboard',  icon: LayoutDashboard, label:'Dashboard' },
-  { to:'/habits',     icon: CheckSquare,     label:'Habits' },
-  { to:'/mood',       icon: Smile,           label:'Mood' },
-  { to:'/sleep',      icon: Moon,            label:'Sleep' },
-  { to:'/hydration',  icon: Droplets,        label:'Hydration' },
-  { to:'/breathing',  icon: Wind,            label:'Breathing' },
-  { to:'/journal',    icon: BookOpen,        label:'Journal' },
-  { to:'/goals',      icon: Target,          label:'Goals' },
-  { to:'/analytics',  icon: BarChart3,       label:'Analytics' },
-  { to:'/calendar',   icon: Calendar,        label:'Calendar' },
+  { to:'/dashboard',  icon: LayoutDashboard, label:'dashboard' },
+  { to:'/habits',     icon: CheckSquare,     label:'habits' },
+  { to:'/mood',       icon: Smile,           label:'mood' },
+  { to:'/sleep',      icon: Moon,            label:'sleep' },
+  { to:'/hydration',  icon: Droplets,        label:'hydration' },
+  { to:'/breathing',  icon: Wind,            label:'breathing' },
+  { to:'/journal',    icon: BookOpen,        label:'journal' },
+  { to:'/goals',      icon: Target,          label:'goals' },
+  { to:'/analytics',  icon: BarChart3,       label:'analytics' },
+  { to:'/calendar',   icon: Calendar,        label:'calendar' },
 ];
 
 export const Sidebar = () => {
@@ -29,7 +29,7 @@ export const Sidebar = () => {
         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg" style={{ backgroundColor:'var(--color-accent)' }}>
           <Zap className="h-4 w-4 text-white" />
         </div>
-        {!sidebarCollapsed && <span className="font-bold text-lg" style={{ color:'var(--color-text-primary)' }}>LifeOS</span>}
+        {!sidebarCollapsed && <span className="font-bold text-lg" style={{ color:'var(--color-text-primary)' }}>lifeos</span>}
       </div>
 
       {/* Nav */}
@@ -54,12 +54,12 @@ export const Sidebar = () => {
           isActive ? 'text-white' : 'hover:bg-[var(--color-surface-2)]'
         )} style={({ isActive }) => isActive ? { backgroundColor:'var(--color-accent)' } : { color:'var(--color-text-secondary)' }}>
           <Settings className="h-4 w-4 shrink-0" />
-          {!sidebarCollapsed && <span>Settings</span>}
+          {!sidebarCollapsed && <span>settings</span>}
         </NavLink>
         <button onClick={() => updatePreference('sidebarCollapsed', !sidebarCollapsed)}
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-[var(--color-surface-2)]"
           style={{ color:'var(--color-text-muted)' }}>
-          {sidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <><ChevronLeft className="h-4 w-4" /><span>Collapse</span></>}
+          {sidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <><ChevronLeft className="h-4 w-4" /><span>collapse</span></>}
         </button>
       </div>
     </aside>

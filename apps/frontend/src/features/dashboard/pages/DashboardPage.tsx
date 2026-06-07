@@ -25,7 +25,7 @@ export default function DashboardPage() {
   const hydrationPct = hydrationToday?.percentage ?? 0;
 
   const hour = new Date().getHours();
-  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const greeting = hour < 12 ? 'good morning' : hour < 17 ? 'good afternoon' : 'good evening';
 
   return (
     <div className="space-y-6">
@@ -35,31 +35,31 @@ export default function DashboardPage() {
           {greeting}, {user?.firstName}! 👋
         </h1>
         <p className="text-sm mt-0.5" style={{ color:'var(--color-text-muted)' }}>
-          {new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' })}
+          {new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' }).toLowerCase()}
         </p>
       </div>
 
       {/* Stats grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {loadingHabits ? <SkeletonCard /> : (
-          <StatCard title="Habits Today" value={`${completedHabits}/${totalHabits}`} icon={CheckSquare} color="#6366f1" description="completed" />
+          <StatCard title="habits today" value={`${completedHabits}/${totalHabits}`} icon={CheckSquare} color="#6366f1" description="completed" />
         )}
-        <StatCard title="Mood" value={avgMood} unit="/10" icon={Smile} color="#f59e0b" description="today's average" />
-        <StatCard title="Hydration" value={`${hydrationPct}%`} icon={Droplets} color="#3b82f6" description={`${hydrationToday?.total ?? 0}ml of ${hydrationToday?.goal ?? 2500}ml`} />
-        <StatCard title="Active Goals" value={goals?.length ?? '--'} icon={Target} color="#22c55e" description="in progress" />
+        <StatCard title="mood" value={avgMood} unit="/10" icon={Smile} color="#f59e0b" description="today's average" />
+        <StatCard title="hydration" value={`${hydrationPct}%`} icon={Droplets} color="#3b82f6" description={`${hydrationToday?.total ?? 0}ml of ${hydrationToday?.goal ?? 2500}ml`} />
+        <StatCard title="active goals" value={goals?.length ?? '--'} icon={Target} color="#22c55e" description="in progress" />
       </div>
 
       {/* Quick Actions */}
       <div className="rounded-xl border p-5" style={{ backgroundColor:'var(--color-surface)', borderColor:'var(--color-border)' }}>
-        <h2 className="text-sm font-semibold mb-3" style={{ color:'var(--color-text-muted)' }}>QUICK ACTIONS</h2>
+        <h2 className="text-sm font-semibold mb-3" style={{ color:'var(--color-text-muted)' }}>quick actions</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
           {[
-            { to:'/habits',    icon: CheckSquare, label:'Log Habit',   color:'#6366f1' },
-            { to:'/mood',      icon: Smile,       label:'Log Mood',    color:'#f59e0b' },
-            { to:'/sleep',     icon: Moon,        label:'Log Sleep',   color:'#8b5cf6' },
-            { to:'/hydration', icon: Droplets,    label:'Log Water',   color:'#3b82f6' },
-            { to:'/breathing', icon: Wind,        label:'Breathe',     color:'#06b6d4' },
-            { to:'/journal/new', icon: BookOpen,  label:'Write',       color:'#ec4899' },
+            { to:'/habits',    icon: CheckSquare, label:'log habit',   color:'#6366f1' },
+            { to:'/mood',      icon: Smile,       label:'log mood',    color:'#f59e0b' },
+            { to:'/sleep',     icon: Moon,        label:'log sleep',   color:'#8b5cf6' },
+            { to:'/hydration', icon: Droplets,    label:'log water',   color:'#3b82f6' },
+            { to:'/breathing', icon: Wind,        label:'breathe',     color:'#06b6d4' },
+            { to:'/journal/new', icon: BookOpen,  label:'write',       color:'#ec4899' },
           ].map(({ to, icon: Icon, label, color }) => (
             <Link key={to} to={to} className="flex flex-col items-center gap-2 rounded-xl p-3 transition-colors hover:bg-[var(--color-surface-2)]">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor:`${color}20` }}>
@@ -76,8 +76,8 @@ export default function DashboardPage() {
         {/* Today's habits */}
         <div className="rounded-xl border p-5" style={{ backgroundColor:'var(--color-surface)', borderColor:'var(--color-border)' }}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold" style={{ color:'var(--color-text-primary)' }}>Today's Habits</h2>
-            <Link to="/habits" className="text-xs hover:underline" style={{ color:'var(--color-accent)' }}>View all</Link>
+            <h2 className="font-semibold" style={{ color:'var(--color-text-primary)' }}>today's habits</h2>
+            <Link to="/habits" className="text-xs hover:underline" style={{ color:'var(--color-accent)' }}>view all</Link>
           </div>
           <div className="space-y-2">
             {habitsToday?.slice(0, 5).map((item: any) => (
@@ -89,15 +89,15 @@ export default function DashboardPage() {
                 <span className="text-xs" style={{ color:'var(--color-text-muted)' }}>{item.habit.category}</span>
               </div>
             ))}
-            {(!habitsToday || habitsToday.length === 0) && <p className="text-sm text-center py-4" style={{ color:'var(--color-text-muted)' }}>No habits yet — <Link to="/habits" style={{ color:'var(--color-accent)' }}>create one!</Link></p>}
+            {(!habitsToday || habitsToday.length === 0) && <p className="text-sm text-center py-4" style={{ color:'var(--color-text-muted)' }}>no habits yet — <Link to="/habits" style={{ color:'var(--color-accent)' }}>create one!</Link></p>}
           </div>
         </div>
 
         {/* Active Goals */}
         <div className="rounded-xl border p-5" style={{ backgroundColor:'var(--color-surface)', borderColor:'var(--color-border)' }}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold" style={{ color:'var(--color-text-primary)' }}>Active Goals</h2>
-            <Link to="/goals" className="text-xs hover:underline" style={{ color:'var(--color-accent)' }}>View all</Link>
+            <h2 className="font-semibold" style={{ color:'var(--color-text-primary)' }}>active goals</h2>
+            <Link to="/goals" className="text-xs hover:underline" style={{ color:'var(--color-accent)' }}>view all</Link>
           </div>
           <div className="space-y-3">
             {goals?.slice(0, 4).map((g: any) => {
@@ -114,7 +114,7 @@ export default function DashboardPage() {
                 </div>
               );
             })}
-            {(!goals || goals.length === 0) && <p className="text-sm text-center py-4" style={{ color:'var(--color-text-muted)' }}>No goals yet — <Link to="/goals" style={{ color:'var(--color-accent)' }}>set one!</Link></p>}
+            {(!goals || goals.length === 0) && <p className="text-sm text-center py-4" style={{ color:'var(--color-text-muted)' }}>no goals yet — <Link to="/goals" style={{ color:'var(--color-accent)' }}>set one!</Link></p>}
           </div>
         </div>
       </div>

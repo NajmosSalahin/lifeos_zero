@@ -40,7 +40,7 @@ export default function AnalyticsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <div><h1 className="text-2xl font-bold" style={{ color:'var(--color-text-primary)' }}>Analytics</h1><p className="text-sm mt-0.5" style={{ color:'var(--color-text-muted)' }}>Your health & habit data visualised</p></div>
+        <div><h1 className="text-2xl font-bold" style={{ color:'var(--color-text-primary)' }}>analytics</h1><p className="text-sm mt-0.5" style={{ color:'var(--color-text-muted)' }}>your health & habit data visualised</p></div>
         <div className="flex items-center gap-2">
           <div className="flex rounded-lg border overflow-hidden" style={{ borderColor:'var(--color-border)' }}>
             {RANGES.map(({label,days})=>(
@@ -49,7 +49,7 @@ export default function AnalyticsPage() {
             ))}
           </div>
           <button onClick={exportJSON} className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs transition-colors hover:bg-[var(--color-surface-2)]" style={{ borderColor:'var(--color-border)', color:'var(--color-text-secondary)' }}>
-            <Download className="h-3.5 w-3.5" /> Export
+            <Download className="h-3.5 w-3.5" /> export
           </button>
         </div>
       </div>
@@ -65,14 +65,14 @@ export default function AnalyticsPage() {
       {tab==='overview' && overview && (
         <div className="space-y-5">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <StatCard title="Avg Mood" value={overview.mood?.average??'--'} unit="/10" color="#f59e0b" />
-            <StatCard title="Avg Sleep" value={overview.sleep?.averageDuration ? `${Math.round(overview.sleep.averageDuration/60)}h ${overview.sleep.averageDuration%60}m` : '--'} color="#8b5cf6" />
-            <StatCard title="Hydration" value={`${overview.hydration?.goalMetRate??0}%`} description="goal met rate" color="#3b82f6" />
-            <StatCard title="Habit Rate" value={`${overview.habits?.byDay?.length ? Math.round(overview.habits.byDay.reduce((s:number,d:any)=>s+d.rate,0)/overview.habits.byDay.length) : 0}%`} description="completion rate" color="#22c55e" />
+            <StatCard title="avg mood" value={overview.mood?.average??'--'} unit="/10" color="#f59e0b" />
+            <StatCard title="avg sleep" value={overview.sleep?.averageDuration ? `${Math.round(overview.sleep.averageDuration/60)}h ${overview.sleep.averageDuration%60}m` : '--'} color="#8b5cf6" />
+            <StatCard title="hydration" value={`${overview.hydration?.goalMetRate??0}%`} description="goal met rate" color="#3b82f6" />
+            <StatCard title="habit rate" value={`${overview.habits?.byDay?.length ? Math.round(overview.habits.byDay.reduce((s:number,d:any)=>s+d.rate,0)/overview.habits.byDay.length) : 0}%`} description="completion rate" color="#22c55e" />
           </div>
           {overview.mood?.scores?.length > 1 && (
             <div className="rounded-xl border p-5" style={{ backgroundColor:'var(--color-surface)', borderColor:'var(--color-border)' }}>
-              <h2 className="font-semibold mb-4" style={{ color:'var(--color-text-primary)' }}>Mood Over Time</h2>
+              <h2 className="font-semibold mb-4" style={{ color:'var(--color-text-primary)' }}>mood over time</h2>
               <ResponsiveContainer width="100%" height={180}>
                 <LineChart data={overview.mood.scores}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
@@ -90,14 +90,14 @@ export default function AnalyticsPage() {
       {tab==='mood' && moodData && (
         <div className="space-y-5">
           <div className="grid grid-cols-2 gap-4">
-            <StatCard title="Average Score" value={moodData.average??'--'} unit="/10" color="#f59e0b" />
-            <StatCard title="Total Entries" value={moodData.totalEntries??0} color="#6366f1" />
+            <StatCard title="average score" value={moodData.average??'--'} unit="/10" color="#f59e0b" />
+            <StatCard title="total entries" value={moodData.totalEntries??0} color="#6366f1" />
           </div>
           {moodData.scores?.length > 1 && (
             <div className="rounded-xl border p-5" style={{ backgroundColor:'var(--color-surface)', borderColor:'var(--color-border)' }}>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="font-semibold" style={{ color:'var(--color-text-primary)' }}>Mood Trend</h2>
-                <button onClick={()=>exportCSV('mood')} className="flex items-center gap-1 text-xs" style={{ color:'var(--color-text-muted)' }}><Download className="h-3 w-3" />CSV</button>
+                <h2 className="font-semibold" style={{ color:'var(--color-text-primary)' }}>mood trend</h2>
+                <button onClick={()=>exportCSV('mood')} className="flex items-center gap-1 text-xs" style={{ color:'var(--color-text-muted)' }}><Download className="h-3 w-3" />csv</button>
               </div>
               <ResponsiveContainer width="100%" height={200}>
                 <LineChart data={moodData.scores}>
@@ -112,7 +112,7 @@ export default function AnalyticsPage() {
           )}
           {moodData.distribution && (
             <div className="rounded-xl border p-5" style={{ backgroundColor:'var(--color-surface)', borderColor:'var(--color-border)' }}>
-              <h2 className="font-semibold mb-4" style={{ color:'var(--color-text-primary)' }}>Score Distribution</h2>
+              <h2 className="font-semibold mb-4" style={{ color:'var(--color-text-primary)' }}>score distribution</h2>
               <ResponsiveContainer width="100%" height={160}>
                 <BarChart data={moodData.distribution}>
                   <XAxis dataKey="score" tick={{ fontSize:10, fill:'var(--color-text-muted)' }} tickLine={false} axisLine={false} />
@@ -129,14 +129,14 @@ export default function AnalyticsPage() {
       {tab==='sleep' && sleepData && (
         <div className="space-y-5">
           <div className="grid grid-cols-2 gap-4">
-            <StatCard title="Avg Duration" value={sleepData.averageDuration ? `${Math.floor(sleepData.averageDuration/60)}h ${sleepData.averageDuration%60}m` : '--'} color="#8b5cf6" />
-            <StatCard title="Avg Quality" value={sleepData.averageQuality??'--'} unit="/5" color="#f59e0b" />
+            <StatCard title="avg duration" value={sleepData.averageDuration ? `${Math.floor(sleepData.averageDuration/60)}h ${sleepData.averageDuration%60}m` : '--'} color="#8b5cf6" />
+            <StatCard title="avg quality" value={sleepData.averageQuality??'--'} unit="/5" color="#f59e0b" />
           </div>
           {sleepData.durations?.length > 0 && (
             <div className="rounded-xl border p-5" style={{ backgroundColor:'var(--color-surface)', borderColor:'var(--color-border)' }}>
               <div className="flex justify-between mb-4">
-                <h2 className="font-semibold" style={{ color:'var(--color-text-primary)' }}>Sleep Duration</h2>
-                <button onClick={()=>exportCSV('sleep')} className="flex items-center gap-1 text-xs" style={{ color:'var(--color-text-muted)' }}><Download className="h-3 w-3" />CSV</button>
+                <h2 className="font-semibold" style={{ color:'var(--color-text-primary)' }}>sleep duration</h2>
+                <button onClick={()=>exportCSV('sleep')} className="flex items-center gap-1 text-xs" style={{ color:'var(--color-text-muted)' }}><Download className="h-3 w-3" />csv</button>
               </div>
               <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={sleepData.durations.map((d:any)=>({...d,hours:Math.round(d.value/60*10)/10}))}>
@@ -154,14 +154,14 @@ export default function AnalyticsPage() {
       {tab==='hydration' && hydrationData && (
         <div className="space-y-5">
           <div className="grid grid-cols-2 gap-4">
-            <StatCard title="Daily Average" value={`${Math.round(hydrationData.average/100)/10}L`} color="#3b82f6" />
-            <StatCard title="Goal Met Rate" value={`${hydrationData.goalMetRate??0}%`} color="#22c55e" />
+            <StatCard title="daily average" value={`${Math.round(hydrationData.average/100)/10}L`} color="#3b82f6" />
+            <StatCard title="goal met rate" value={`${hydrationData.goalMetRate??0}%`} color="#22c55e" />
           </div>
           {hydrationData.intake?.length > 0 && (
             <div className="rounded-xl border p-5" style={{ backgroundColor:'var(--color-surface)', borderColor:'var(--color-border)' }}>
               <div className="flex justify-between mb-4">
-                <h2 className="font-semibold" style={{ color:'var(--color-text-primary)' }}>Daily Intake vs Goal</h2>
-                <button onClick={()=>exportCSV('hydration')} className="flex items-center gap-1 text-xs" style={{ color:'var(--color-text-muted)' }}><Download className="h-3 w-3" />CSV</button>
+                <h2 className="font-semibold" style={{ color:'var(--color-text-primary)' }}>daily intake vs goal</h2>
+                <button onClick={()=>exportCSV('hydration')} className="flex items-center gap-1 text-xs" style={{ color:'var(--color-text-muted)' }}><Download className="h-3 w-3" />csv</button>
               </div>
               <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={hydrationData.intake}>
@@ -190,7 +190,7 @@ export default function AnalyticsPage() {
               <p className="text-xs mt-1 capitalize" style={{ color:'var(--color-text-muted)' }}>{g.status} · {g.category}</p>
             </div>
           ))}
-          {(!goalsData || goalsData.length === 0) && <p className="text-center py-12 text-sm" style={{ color:'var(--color-text-muted)' }}>No goals data</p>}
+          {(!goalsData || goalsData.length === 0) && <p className="text-center py-12 text-sm" style={{ color:'var(--color-text-muted)' }}>no goals data</p>}
         </div>
       )}
     </div>

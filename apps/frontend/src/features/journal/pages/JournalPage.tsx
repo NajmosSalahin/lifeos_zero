@@ -40,25 +40,25 @@ export default function JournalPage() {
 
   const deleteMut = useMutation({
     mutationFn: (id: string) => api.delete(`/journal/${id}`),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['journal'] }); success('Entry deleted'); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['journal'] }); success('entry deleted'); },
   });
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color:'var(--color-text-primary)' }}>Journal</h1>
+          <h1 className="text-2xl font-bold" style={{ color:'var(--color-text-primary)' }}>journal</h1>
           {stats && <p className="text-sm mt-0.5" style={{ color:'var(--color-text-muted)' }}>{stats.totalEntries} entries · {stats.totalWords?.toLocaleString()} words</p>}
         </div>
         <button onClick={()=>navigate('/journal/new')} className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white" style={{ backgroundColor:'var(--color-accent)' }}>
-          <Plus className="h-4 w-4" /> New Entry
+          <Plus className="h-4 w-4" /> new entry
         </button>
       </div>
 
       {/* Search */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color:'var(--color-text-muted)' }} />
-        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search entries…"
+        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="search entries…"
           className="w-full rounded-lg border pl-10 pr-4 py-2.5 text-sm outline-none focus:border-[var(--color-accent)]"
           style={{ backgroundColor:'var(--color-surface)', borderColor:'var(--color-border)', color:'var(--color-text-primary)' }} />
       </div>
@@ -69,7 +69,7 @@ export default function JournalPage() {
           <button onClick={()=>setFavoriteOnly(!favoriteOnly)}
             className="flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium transition-colors"
             style={favoriteOnly?{backgroundColor:'var(--color-accent)',color:'#fff'}:{backgroundColor:'var(--color-surface)',border:'1px solid var(--color-border)',color:'var(--color-text-secondary)'}}>
-            <Star className="h-3 w-3" /> Favorites
+            <Star className="h-3 w-3" /> favorites
           </button>
           {tagsData.slice(0,8).map((t: any) => (
             <button key={t.tag} onClick={()=>setActiveTag(activeTag===t.tag?'':t.tag)}
@@ -85,7 +85,7 @@ export default function JournalPage() {
       {isLoading ? (
         <div className="space-y-3">{[1,2,3].map(i=><div key={i} className="h-24 rounded-xl border animate-pulse" style={{ backgroundColor:'var(--color-surface-2)', borderColor:'var(--color-border)' }} />)}</div>
       ) : data?.items?.length === 0 ? (
-        <EmptyState icon={BookOpen} title="No entries yet" description="Write your first journal entry." action={{ label:'Write entry', onClick:()=>navigate('/journal/new') }} />
+        <EmptyState icon={BookOpen} title="no entries yet" description="write your first journal entry." action={{ label:'write entry', onClick:()=>navigate('/journal/new') }} />
       ) : (
         <div className="space-y-3">
           {data?.items?.map((e: any) => (

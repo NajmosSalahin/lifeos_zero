@@ -73,7 +73,7 @@ export default function BreathingPage() {
 
   return (
     <div className="space-y-6">
-      <div><h1 className="text-2xl font-bold" style={{ color:'var(--color-text-primary)' }}>Breathing</h1><p className="text-sm mt-0.5" style={{ color:'var(--color-text-muted)' }}>Guided breathing sessions</p></div>
+      <div><h1 className="text-2xl font-bold" style={{ color:'var(--color-text-primary)' }}>breathing</h1><p className="text-sm mt-0.5" style={{ color:'var(--color-text-muted)' }}>guided breathing sessions</p></div>
 
       {/* Technique selector */}
       <div className="flex gap-2 overflow-x-auto pb-1">
@@ -91,14 +91,14 @@ export default function BreathingPage() {
         {done ? (
           <div className="text-center py-4">
             <Check className="h-16 w-16 mx-auto mb-4 text-emerald-400" />
-            <h2 className="text-xl font-bold mb-2" style={{ color:'var(--color-text-primary)' }}>Session complete!</h2>
+            <h2 className="text-xl font-bold mb-2" style={{ color:'var(--color-text-primary)' }}>session complete!</h2>
             <p className="text-sm mb-4" style={{ color:'var(--color-text-muted)' }}>{cycles} cycles · {Math.round(totalElapsed)}s</p>
             <div className="flex gap-2 justify-center mb-4">
               {[1,2,3,4,5].map(r=><button key={r} onClick={()=>setRating(r)} className="text-2xl transition-transform hover:scale-110">{r<=rating?'⭐':'☆'}</button>)}
             </div>
             <div className="flex gap-2 justify-center">
-              <button onClick={reset} className="rounded-lg border px-4 py-2 text-sm" style={{ borderColor:'var(--color-border)', color:'var(--color-text-secondary)' }}>Do again</button>
-              <button onClick={saveSession} className="rounded-lg px-4 py-2 text-sm font-medium text-white" style={{ backgroundColor:'var(--color-accent)' }}>Save session</button>
+              <button onClick={reset} className="rounded-lg border px-4 py-2 text-sm" style={{ borderColor:'var(--color-border)', color:'var(--color-text-secondary)' }}>do again</button>
+              <button onClick={saveSession} className="rounded-lg px-4 py-2 text-sm font-medium text-white" style={{ backgroundColor:'var(--color-accent)' }}>save session</button>
             </div>
           </div>
         ) : (
@@ -112,13 +112,13 @@ export default function BreathingPage() {
                 <div className="text-xs mt-1" style={{ color:'var(--color-text-muted)' }}>{Math.ceil(currentPhase.durationSeconds - elapsed)}s</div>
               </div>
             </div>
-            <p className="text-sm mb-6" style={{ color:'var(--color-text-muted)' }}>Cycle {cycles + 1} of {currentTech?.recommendedCycles ?? 5}</p>
+            <p className="text-sm mb-6" style={{ color:'var(--color-text-muted)' }}>cycle {cycles + 1} of {currentTech?.recommendedCycles ?? 5}</p>
             <div className="flex gap-3">
               <button onClick={reset} className="flex items-center gap-2 rounded-xl border px-4 py-2 text-sm transition-colors hover:bg-[var(--color-surface-2)]" style={{ borderColor:'var(--color-border)', color:'var(--color-text-secondary)' }}>
                 <RotateCcw className="h-4 w-4" />
               </button>
               <button onClick={()=>setIsActive(!isActive)} className="flex items-center gap-2 rounded-xl px-6 py-2 text-sm font-medium text-white" style={{ backgroundColor: phaseColor }}>
-                {isActive ? <><Pause className="h-4 w-4" />Pause</> : <><Play className="h-4 w-4" />Start</>}
+                {isActive ? <><Pause className="h-4 w-4" />pause</> : <><Play className="h-4 w-4" />start</>}
               </button>
             </div>
           </>
@@ -128,7 +128,7 @@ export default function BreathingPage() {
       {/* Recent sessions */}
       {sessions && sessions.length > 0 && (
         <div>
-          <h2 className="text-sm font-semibold mb-3" style={{ color:'var(--color-text-muted)' }}>RECENT SESSIONS</h2>
+          <h2 className="text-sm font-semibold mb-3" style={{ color:'var(--color-text-muted)' }}>recent sessions</h2>
           <div className="space-y-2">
             {sessions?.slice(0,5).map((s: any) => (
               <div key={s._id} className="flex items-center gap-3 rounded-xl border px-4 py-3" style={{ backgroundColor:'var(--color-surface)', borderColor:'var(--color-border)' }}>

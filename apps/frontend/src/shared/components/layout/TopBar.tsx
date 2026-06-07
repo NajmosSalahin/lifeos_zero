@@ -28,12 +28,12 @@ export const TopBar = () => {
         <button onClick={() => navigate('/settings')}
           className="flex h-9 w-9 items-center justify-center rounded-lg text-sm font-semibold transition-colors hover:bg-[var(--color-surface-2)]"
           style={{ backgroundColor:'var(--color-surface-2)', color:'var(--color-text-primary)' }}
-          title={user ? `${user.firstName} ${user.lastName}` : 'Profile'}>
+          title={user ? `${user.firstName} ${user.lastName}` : 'profile'}>
           {user ? getInitials(user.firstName, user.lastName) : <User className="h-4 w-4" />}
         </button>
         <button onClick={handleLogout}
           className="flex h-9 w-9 items-center justify-center rounded-lg transition-colors hover:bg-[var(--color-surface-2)]"
-          style={{ color:'var(--color-text-muted)' }} title="Log out">
+          style={{ color:'var(--color-text-muted)' }} title="log out">
           <LogOut className="h-4 w-4" />
         </button>
       </div>

@@ -9,7 +9,7 @@ import { formatDate, formatTime } from '../../../shared/lib/utils';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 const MOOD_EMOJIS = ['','😞','😟','😕','😐','😶','🙂','😊','😄','😁','🤩'];
-const MOOD_LABELS = ['','Terrible','Bad','Poor','Okay','Neutral','Good','Great','Excellent','Amazing','Perfect'];
+  const MOOD_LABELS = ['','terrible','bad','poor','okay','neutral','good','great','excellent','amazing','perfect'];
 const MOOD_COLORS = ['','#ef4444','#f97316','#f59e0b','#eab308','#84cc16','#22c55e','#10b981','#06b6d4','#3b82f6','#8b5cf6'];
 
 export default function MoodPage() {
@@ -40,18 +40,18 @@ export default function MoodPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color:'var(--color-text-primary)' }}>Mood</h1>
-          {insights && <p className="text-sm mt-0.5" style={{ color:'var(--color-text-muted)' }}>Average: {insights.average}/10 · {insights.trend}</p>}
+          <h1 className="text-2xl font-bold" style={{ color:'var(--color-text-primary)' }}>mood</h1>
+          {insights && <p className="text-sm mt-0.5" style={{ color:'var(--color-text-muted)' }}>average: {insights.average}/10 · {insights.trend}</p>}
         </div>
         <button onClick={()=>setShowLog(!showLog)} className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white" style={{ backgroundColor:'var(--color-accent)' }}>
-          <Plus className="h-4 w-4" /> Log Mood
+          <Plus className="h-4 w-4" /> log mood
         </button>
       </div>
 
       {/* Log form */}
       {showLog && (
         <div className="rounded-xl border p-5" style={{ backgroundColor:'var(--color-surface)', borderColor:'var(--color-border)' }}>
-          <h2 className="font-semibold mb-4" style={{ color:'var(--color-text-primary)' }}>How are you feeling?</h2>
+          <h2 className="font-semibold mb-4" style={{ color:'var(--color-text-primary)' }}>how are you feeling?</h2>
           <div className="text-center mb-4">
             <div className="text-5xl mb-2">{MOOD_EMOJIS[score]}</div>
             <div className="font-medium mb-1" style={{ color:'var(--color-text-primary)' }}>{MOOD_LABELS[score]}</div>
@@ -66,9 +66,9 @@ export default function MoodPage() {
             className="w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-[var(--color-accent)] mb-4"
             style={{ backgroundColor:'var(--color-surface-2)', borderColor:'var(--color-border)', color:'var(--color-text-primary)' }} />
           <div className="flex gap-2">
-            <button onClick={()=>setShowLog(false)} className="flex-1 rounded-lg border py-2 text-sm" style={{ borderColor:'var(--color-border)', color:'var(--color-text-secondary)' }}>Cancel</button>
+            <button onClick={()=>setShowLog(false)} className="flex-1 rounded-lg border py-2 text-sm" style={{ borderColor:'var(--color-border)', color:'var(--color-text-secondary)' }}>cancel</button>
             <button onClick={()=>logMut.mutate()} disabled={logMut.isPending} className="flex-1 rounded-lg py-2 text-sm font-medium text-white disabled:opacity-50" style={{ backgroundColor:'var(--color-accent)' }}>
-              {logMut.isPending?'Saving…':'Save Mood'}
+              {logMut.isPending?'saving…':'save mood'}
             </button>
           </div>
         </div>
@@ -77,7 +77,7 @@ export default function MoodPage() {
       {/* Chart */}
       {chartData.length > 1 && (
         <div className="rounded-xl border p-5" style={{ backgroundColor:'var(--color-surface)', borderColor:'var(--color-border)' }}>
-          <h2 className="font-semibold mb-4" style={{ color:'var(--color-text-primary)' }}>Mood Trend</h2>
+          <h2 className="font-semibold mb-4" style={{ color:'var(--color-text-primary)' }}>mood trend</h2>
           <ResponsiveContainer width="100%" height={180}>
             <LineChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
@@ -92,7 +92,7 @@ export default function MoodPage() {
 
       {/* History */}
       <div className="space-y-2">
-        {moodData?.items?.length === 0 && <EmptyState icon={Smile} title="No mood logs yet" description="Start tracking how you feel each day." />}
+        {moodData?.items?.length === 0 && <EmptyState icon={Smile} title="no mood logs yet" description="start tracking how you feel each day." />}
         {moodData?.items?.map((m: any) => (
           <div key={m._id} className="flex items-center gap-4 rounded-xl border px-4 py-3 hover:border-[var(--color-border-active)] transition-colors"
             style={{ backgroundColor:'var(--color-surface)', borderColor:'var(--color-border)' }}>
