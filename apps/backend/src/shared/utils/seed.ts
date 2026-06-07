@@ -19,15 +19,22 @@ export const seedSystemData = async () => {
     ]);
     logger.info('Seeded breathing techniques');
   }
+
   const drinkCount = await DrinkTemplate.countDocuments({ isSystem: true });
   if (drinkCount === 0) {
     await DrinkTemplate.insertMany([
-      { name: 'Glass of Water', amountMl: 250, drinkType: 'water', icon: 'droplets', color: '#3b82f6', isSystem: true },
-      { name: 'Water Bottle', amountMl: 500, drinkType: 'water', icon: 'droplets', color: '#3b82f6', isSystem: true },
-      { name: 'Large Bottle', amountMl: 750, drinkType: 'water', icon: 'droplets', color: '#3b82f6', isSystem: true },
-      { name: 'Cup of Coffee', amountMl: 240, drinkType: 'coffee', icon: 'coffee', color: '#92400e', isSystem: true },
-      { name: 'Cup of Tea', amountMl: 240, drinkType: 'tea', icon: 'coffee', color: '#d97706', isSystem: true },
-      { name: 'Juice Glass', amountMl: 200, drinkType: 'juice', icon: 'glass-water', color: '#f97316', isSystem: true },
+      { name: 'Glass of Water',   amountMl: 250,  drinkType: 'water',        emoji: '💧', color: '#3b82f6', waterFactor: 1.0,  isSystem: true },
+      { name: 'Water Bottle',     amountMl: 500,  drinkType: 'water',        emoji: '🍶', color: '#3b82f6', waterFactor: 1.0,  isSystem: true },
+      { name: 'Large Bottle',     amountMl: 1000, drinkType: 'water',        emoji: '🫙', color: '#3b82f6', waterFactor: 1.0,  isSystem: true },
+      { name: 'Cup of Coffee',    amountMl: 240,  drinkType: 'coffee',       emoji: '☕', color: '#92400e', waterFactor: 0.85, isSystem: true },
+      { name: 'Cup of Tea',       amountMl: 240,  drinkType: 'tea',          emoji: '🍵', color: '#d97706', waterFactor: 0.98, isSystem: true },
+      { name: 'Juice Glass',      amountMl: 200,  drinkType: 'juice',        emoji: '🥤', color: '#f97316', waterFactor: 0.85, isSystem: true },
+      { name: 'Milk Glass',       amountMl: 250,  drinkType: 'milk',         emoji: '🥛', color: '#e5e7eb', waterFactor: 0.87, isSystem: true },
+      { name: 'Sports Drink',     amountMl: 500,  drinkType: 'sports',       emoji: '⚡', color: '#22c55e', waterFactor: 0.95, isSystem: true },
+      { name: 'Soda Can',         amountMl: 330,  drinkType: 'soda',         emoji: '🫧', color: '#a855f7', waterFactor: 0.85, isSystem: true },
+      { name: 'Energy Drink',     amountMl: 250,  drinkType: 'energy',       emoji: '🔋', color: '#eab308', waterFactor: 0.80, isSystem: true },
+      { name: 'Smoothie',         amountMl: 350,  drinkType: 'smoothie',     emoji: '🥤', color: '#ec4899', waterFactor: 0.88, isSystem: true },
+      { name: 'Coconut Water',    amountMl: 330,  drinkType: 'coconut',      emoji: '🥥', color: '#84cc16', waterFactor: 0.95, isSystem: true },
     ]);
     logger.info('Seeded drink templates');
   }
